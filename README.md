@@ -1,67 +1,27 @@
-# 🤖 BIZ AI AGENT | 사업자등록증 기반 AI 경영·금융 수석 컨설팅 에이전트 시스템
+# 🔮 Shinhan BIZ SCANNER by myungmin
 
-> **사업자등록증 스캔을 통해 사업자 특화 데이터를 인지(Perceive)하고, 자율 추론(Reasoning)으로 2026년 정책자금·보증 대출 추천 및 업태별 경영 리스크 솔루션을 도출하며, 실시간 AI 에이전트 대화(Q&A) 세션과 종합 보고서 자동 생성/발송(`e.factorials@gmail.com`)까지 수행하는 지능형 AI 에이전트 시스템입니다.**
-
----
-
-## 🤖 AI 에이전트 아키텍처 (Agent Architecture)
-
-```
-                       ┌───────────────────────────────┐
-                       │   스마트폰 모바일 웹 사용자    │
-                       └──────────────┬────────────────┘
-                                      │ (카메라 스캔 / 1-클릭 입력)
-                                      ▼
-                       ┌───────────────────────────────┐
-                       │   1. Perception Agent (인지)   │
-                       │   - 이미지 전처리 & 서식 파싱 │
-                       └──────────────┬────────────────┘
-                                      │
-                                      ▼
-                       ┌───────────────────────────────┐
-                       │   2. Reasoning Agent (추론)   │
-                       │   - 2026 정책자금 DB 자율 매칭 │
-                       │   - 업태별 경영 위험요소 진단  │
-                       └──────────────┬────────────────┘
-                                      │
-                                      ▼
- ┌────────────────────────────────────┴────────────────────────────────────┐
- │                  3. Interactive Advisory Agent (실시간 상담)             │
- │                  - 대출/세무/노무 실시간 Q&A AI 질의응답 솔루션          │
- └────────────────────────────────────┬────────────────────────────────────┘
-                                      │
-                                      ▼
-                       ┌───────────────────────────────┐
-                       │  4. Dispatch Agent (보고서)   │
-                       │  - 종합 리포트 생성 & 메일 발송 │
-                       │    (e.factorials@gmail.com)   │
-                       └───────────────────────────────┘
-```
+> **사업자등록증 스캔 한 번으로 2026년 정책자금·보증 대출 추천, 업태별 3대 AI 종합 분석(Gemini + Naver + Google NotebookLM), 그리고 e.factorials@gmail.com 자동 실시간 메일 전송까지 1-Touch로 처리하는 모바일 맞춤형 금융 에이전트 서비스입니다.**
 
 ---
 
-## 🌟 주요 AI 에이전트 핵심 역량
+## 🎨 SIGNS AI 디자인 & 초고속 1-Touch 자동화 파이프라인
 
-### 1. 🤖 AI 사업자 인지 에이전트 (Perception Agent)
-- **스마트폰 모바일 OCR 파이프라인**: 캔버스 고대비(Contrast +25%) 이미지 처리 및 한국어 퍼지 패턴 추출.
-- **자율 오독 교정**: 등록번호(`XXX-XX-XXXXX`), 상호, 대표자, 개업일자, 주소, 업태/종목 파싱.
-- **1-클릭 즉시 테스트 샘플**: 음식점업, IT/소프트웨어, 제조업, 도소매업, 건설업 5가지 대표 업종 샘플 데이터 제공.
+- **SIGNS AI (`signs-ai.com`) 디자인 시스템**: 딥 퍼플 슬레이트 (`#090714`), 소프트 라벤더 (`#EEEAFF`), 라이락 (`#B3A3F8`), 글래스모피즘 HUD 카체 & 유동형 그라데이션 버튼
+- **1-Touch 스캔 & 자동 메일 전송**: 사업자등록증 사진 촬영 즉시 OCR 파싱 ➔ 3대 AI 분석 ➔ `e.factorials@gmail.com` 실시간 전송
+- **Gmail 16자리 앱 비밀번호 연동**: 구글 보안 정책을 통과하는 무소음 백그라운드 자동 서버 발송 (`smtp.gmail.com`)
 
-### 2. 💡 AI 금융·경영 자율 추론 에이전트 (Reasoning Agent)
-- **맞춤형 금융 혜택 추론**:
-  - *소상공인 정책자금*: 연 2~3%대 저금리 융자 & 청년 우대 조건.
-  - *지역 신용보증재단*: 담보 없는 100% 보증서 대출 & 지자체 이차보전 1.5~2.5%p 지원.
-  - *업종 특화 보증*: IT (기술보증기금 KIBO), 제조 (스마트공장 시설자금), 외식업 (식재료 구매자금).
-- **2026 업태별 리스크 & 액션 플랜(Action Plan)**:
-  - 음식점업 (최저임금, 배달 수수료, 위생등급제), IT (R&D 세액공제 25%, ISMS, 스톡옵션), 제조업 (5인 이상 중대재해처벌법, 에너지 비용), 도소매업 (빠른 정산, 재고 자금), 건설업 (자재 단가, 하자보수보증).
+---
 
-### 3. 💬 AI 에이전트 실시간 상담 세션 (Interactive Agent Chat)
-- 사용자가 "우리 매장 대출 한도는?", "식자재 절세법 알려줘", "최저임금 지원금 받는 법" 등 질의 시 **실시간 맞춤형 컨설팅 답변 생성**.
+## 🚀 GitHub 저장소 업로드 & 배포 방법 (GitHub Deployment)
 
-### 4. ✉️ 종합 리포트 생성 및 자동 이메일 발송 에이전트 (Dispatch Agent)
-- 수신자 `e.factorials@gmail.com`으로 분석 리포트 전송.
-- **원클릭 모바일 메일 앱 (`mailto:`) 연동**: 수신자, 제목, 본문이 자동 설정되어 Google 스팸 정책 차단 없이 100% 수신함 전달.
-- 리포트 클립보드 복사 및 `.txt` 파일 저장 기능 제공.
+### 1️⃣ GitHub 저장소 생성 & 푸시 (Quick Start)
+GitHub 웹사이트([github.com/new](https://github.com/new))에서 **`Shinhan_BIZ_SCANNER`** 저장소를 생성하신 후, 터미널에서 다음 명령어를 실행하면 즉시 업로드됩니다:
+
+```bash
+git remote add origin https://github.com/Double-El/Shinhan_BIZ_SCANNER.git
+git branch -M main
+git push -u origin main
+```
 
 ---
 
@@ -69,29 +29,11 @@
 
 | 구분 | 사용 기술 |
 | :--- | :--- |
-| **Agent Framework** | AI Reasoning Engine (`aiAgentEngine.js`), Interactive Agent Chat |
-| **Frontend** | React 18, Vite 6, JavaScript (ES6+), Glassmorphic Dark UI |
-| **Icons & Effects** | Lucide React, Canvas Confetti |
-| **Backend Service** | Node.js, Express, Nodemailer, REST API (`/api/ocr`, `/api/send-email`) |
+| **Design Theme** | Signs AI Glassmorphism Theme (`#090714` / `#674DDB` / `#EEEAFF`) |
+| **Frontend** | React 18, Vite 6, Tailwind CSS, Lucide React, Space Grotesk Font |
+| **Backend & OCR** | Node.js Express, Tesseract.js (kor+eng), Nodemailer (Gmail SMTP) |
+| **AI Engine** | Gemini Financial Advisor, Naver Industry Issues, Google NotebookLM Secrets |
 
 ---
 
-## 🚀 실행 가이드
-
-### 1. 의존성 패키지 설치
-```bash
-npm install
-```
-
-### 2. AI 에이전트 시스템 및 백엔드 구동
-```bash
-npm run dev
-```
-
-### 3. 접속 주소
-- **컴퓨터 브라우저**: `http://localhost:3000`
-- **스마트폰 모바일 브라우저**: `http://172.30.1.21:3000`
-
----
-
-© 2026 BIZ AI AGENT. All Rights Reserved.
+© 2026 Shinhan BIZ SCANNER by myungmin. All Rights Reserved.
