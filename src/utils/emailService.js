@@ -69,30 +69,38 @@ export async function sendEmailReport({ recipientEmail, certData, financialList,
   const subject = `[Shinhan BIZ SCANNER] ${certData?.companyName || '사업자'} 맞춤형 금융·경영이슈 분석 리포트`;
   const mailtoUrl = getMailtoUrl(targetEmail, certData, financialList, industryData);
 
-  // 1. Try Backend Nodemailer API Server (/api/send-email or absolute host)
+  // 1. Try Vercel Serverless Function & Local Backend API (/api/send-email)
   try {
-    const host = window.location.hostname || 'localhost';
-    const serverUrl = `http://${host}:3001/api/send-email`;
+    const endpoints = [
+      '/api/send-email',
+      `http://${window.location.hostname || 'localhost'}:3001/api/send-email`
+    ];
 
-    const res = await fetch(serverUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: targetEmail,
-        subject,
-        text: reportBody
-      })
-    });
+    for (const serverUrl of endpoints) {
+      try {
+        const res = await fetch(serverUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: targetEmail,
+            subject,
+            text: reportBody
+          })
+        });
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && !data.requiresAuth) {
-        return {
-          success: true,
-          method: 'backend_server',
-          message: `${targetEmail} 주소로 실제 리포트 이메일이 발송되었습니다!`,
-          previewUrl: data.previewUrl || null
-        };
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && !data.requiresAuth) {
+            return {
+              success: true,
+              method: 'backend_server',
+              message: `${targetEmail} 주소로 실제 리포트 이메일이 발송되었습니다!`,
+              previewUrl: data.previewUrl || null
+            };
+          }
+        }
+      } catch (e) {
+        // Continue to next endpoint
       }
     }
   } catch (err) {
