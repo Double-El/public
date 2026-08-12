@@ -1,0 +1,162 @@
+@import "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css";
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+
+:root {
+  font-family: 'Space Grotesk', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  color-scheme: dark;
+  --signs-bg: #090714;
+  --signs-purple: #674DDB;
+  --signs-purple-dark: #3C2895;
+  --signs-lilac: #B3A3F8;
+  --signs-light-lilac: #EEEAFF;
+  --signs-accent-indigo: #9884F1;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--signs-bg);
+  background-image: 
+    radial-gradient(circle at 50% -10%, rgba(103, 77, 219, 0.25) 0%, transparent 60%),
+    radial-gradient(circle at 80% 60%, rgba(152, 132, 241, 0.08) 0%, transparent 50%);
+  background-attachment: fixed;
+  color: #eeeaff;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Signs AI Glassmorphism & Animated Gradient Cards */
+.card-clean {
+  background: rgba(18, 14, 38, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(179, 163, 248, 0.2);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 1px 0 rgba(238, 234, 255, 0.1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-clean:hover {
+  border-color: rgba(179, 163, 248, 0.4);
+  box-shadow: 0 12px 40px 0 rgba(103, 77, 219, 0.25), inset 0 1px 1px 0 rgba(238, 234, 255, 0.2);
+}
+
+.card-subtle {
+  background: rgba(28, 22, 58, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(152, 132, 241, 0.2);
+  border-radius: 1rem;
+}
+
+.input-clean {
+  background: rgba(22, 17, 46, 0.8);
+  border: 1px solid rgba(179, 163, 248, 0.25);
+  color: #eeeaff;
+  border-radius: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.input-clean:focus {
+  outline: none;
+  border-color: #9884F1;
+  box-shadow: 0 0 0 3px rgba(152, 132, 241, 0.25);
+}
+
+/* Signs AI Signature Animated Gradient Buttons */
+@keyframes flowGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #674DDB 0%, #3C2895 50%, #9884F1 100%);
+  background-size: 200% 200%;
+  animation: flowGradient 6s ease infinite;
+  color: #eeeaff;
+  font-weight: 700;
+  border-radius: 1rem;
+  border: 1px solid rgba(238, 234, 255, 0.2);
+  box-shadow: 0 4px 20px rgba(103, 77, 219, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(103, 77, 219, 0.6);
+}
+
+.btn-secondary {
+  background: rgba(30, 23, 64, 0.8);
+  color: #b3a3f8;
+  border: 1px solid rgba(179, 163, 248, 0.3);
+  font-weight: 600;
+  border-radius: 1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(45, 35, 96, 0.9);
+  color: #eeeaff;
+  border-color: rgba(179, 163, 248, 0.5);
+}
+
+/* Signs AI Scanner HUD & Purple Laser Animations */
+@keyframes scanLaserPurple {
+  0% { top: 0%; opacity: 0.7; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0.7; }
+}
+
+.animate-scan-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, #b3a3f8 20%, #9884f1 50%, #b3a3f8 80%, transparent 100%);
+  box-shadow: 0 0 15px 3px rgba(179, 163, 248, 0.8), 0 0 30px 6px rgba(103, 77, 219, 0.5);
+  animation: scanLaserPurple 2.2s ease-in-out infinite alternate;
+}
+
+.scanner-grid-bg {
+  background-image: 
+    linear-gradient(to right, rgba(179, 163, 248, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(179, 163, 248, 0.08) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.corner-reticle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: #b3a3f8;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090714;
+}
+::-webkit-scrollbar-thumb {
+  background: #3c2895;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #674ddb;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
