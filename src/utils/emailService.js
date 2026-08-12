@@ -1,6 +1,6 @@
 import { getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets } from './aiAgentEngine';
 
-const DEFAULT_TARGET_EMAIL = 'e.factorials@gmail.com';
+const DEFAULT_TARGET_EMAIL = 'e.factorials@gmail.com, myungmin@shinhan.com';
 
 // Generate Clean Text Summary for Email & Export
 export function generateEmailReportBody(certData, financialList, industryData) {

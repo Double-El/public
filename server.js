@@ -219,7 +219,7 @@ app.post('/api/config-smtp', (req, res) => {
 // 3. Email Send Endpoint
 app.post('/api/send-email', async (req, res) => {
   const { to, subject, text, smtpUser, smtpPass } = req.body;
-  const recipient = to || 'e.factorials@gmail.com';
+  const recipient = to || 'e.factorials@gmail.com, myungmin@shinhan.com';
 
   let activeTransporter = transporter;
   if (smtpUser && smtpPass) {

@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   }
 
   const { to, subject, text } = req.body || {};
-  const recipient = to || 'e.factorials@gmail.com';
+  const recipient = to || 'e.factorials@gmail.com, myungmin@shinhan.com';
 
   try {
     let info = await transporter.sendMail({
