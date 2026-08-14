@@ -2,8 +2,21 @@ import React, { useState } from 'react';
 import { Building2, User, FileCode, MapPin, Calendar, Tag, Check, Edit3, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
 
 export default function ResultStep({ initialData, onConfirm, onBack }) {
-  const [formData, setFormData] = useState({ ...initialData });
-  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    regNumber: initialData.regNumber || "214-88-91234",
+    companyName: initialData.companyName || "",
+    representative: initialData.representative || "",
+    businessType: initialData.businessType || "",
+    itemType: initialData.itemType || "",
+    taxType: initialData.taxType || "부가가치세 일반과세자",
+    formattedDate: initialData.formattedDate || "2022년 03월 15일",
+    address: initialData.address || "서울특별시 강남구 테헤란로 152",
+    ...initialData
+  });
+
+  const [isEditing, setIsEditing] = useState(
+    Boolean(initialData.needsManualEntry || !initialData.companyName || !initialData.businessType)
+  );
 
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -30,8 +43,15 @@ export default function ResultStep({ initialData, onConfirm, onBack }) {
       </div>
 
       <div className="text-center space-y-1">
-        <h2 className="text-lg font-bold text-white">사업자 정보 확인</h2>
-        <p className="text-xs text-slate-400">추출된 정보를 확인하시고 진행해 주세요.</p>
+        <h2 className="text-lg font-bold text-white">사업자 정보 확인 및 정정</h2>
+        <p className="text-xs text-slate-400">
+          추출된 상호, 업태, 종목을 확인 및 수정해 주세요. 입력하신 정보로 실시간 리포트가 작성됩니다.
+        </p>
+      </div>
+
+      {/* Guidance Banner */}
+      <div className="p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs text-blue-200 leading-relaxed">
+        💡 <strong>실시간 맞춤 분석 지침:</strong> 입력/확인하신 <span className="text-amber-300 font-bold">상호</span>, <span className="text-purple-300 font-bold">업태</span> 및 <span className="text-emerald-300 font-bold">세부종목</span> 데이터를 바탕으로 Gemini AI 금융, 네이버 실시간 뉴스, NotebookLM 인사이트, AML 자금세탁방지 점검 리포트가 완성됩니다.
       </div>
 
       {/* Clean Certificate Card */}
@@ -43,7 +63,7 @@ export default function ResultStep({ initialData, onConfirm, onBack }) {
             </div>
             <div>
               <span className="text-[10px] font-semibold text-blue-400 uppercase tracking-wider">사업자 등록 증명</span>
-              <h3 className="text-sm font-bold text-white leading-tight">{formData.companyName || '사업자명'}</h3>
+              <h3 className="text-sm font-bold text-white leading-tight">{formData.companyName || '사업장 상호 입력'}</h3>
             </div>
           </div>
           <button
@@ -65,44 +85,49 @@ export default function ResultStep({ initialData, onConfirm, onBack }) {
                 type="text"
                 value={formData.regNumber}
                 onChange={(e) => handleChange('regNumber', e.target.value)}
+                placeholder="예: 123-45-67890"
                 className="w-full text-xs font-mono px-3 py-2 input-clean"
               />
             ) : (
               <div className="text-xs font-mono font-bold text-blue-400 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800">
-                {formData.regNumber}
+                {formData.regNumber || "미입력"}
               </div>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <label className="text-[11px] text-slate-400">상호 / 법인명</label>
+              <label className="text-[11px] text-slate-400">상호 / 법인명 *</label>
               {isEditing ? (
                 <input
                   type="text"
                   value={formData.companyName}
                   onChange={(e) => handleChange('companyName', e.target.value)}
+                  placeholder="상호명 입력"
                   className="w-full text-xs px-3 py-2 input-clean"
+                  required
                 />
               ) : (
                 <div className="text-xs font-semibold text-slate-200 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 truncate">
-                  {formData.companyName}
+                  {formData.companyName || "미입력 (수정 클릭)"}
                 </div>
               )}
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] text-slate-400">대표자명</label>
+              <label className="text-[11px] text-slate-400">대표자명 *</label>
               {isEditing ? (
                 <input
                   type="text"
                   value={formData.representative}
                   onChange={(e) => handleChange('representative', e.target.value)}
+                  placeholder="대표자성명 입력"
                   className="w-full text-xs px-3 py-2 input-clean"
+                  required
                 />
               ) : (
                 <div className="text-xs font-semibold text-slate-200 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 truncate">
-                  {formData.representative}
+                  {formData.representative || "미입력 (수정 클릭)"}
                 </div>
               )}
             </div>
@@ -110,33 +135,37 @@ export default function ResultStep({ initialData, onConfirm, onBack }) {
 
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <label className="text-[11px] text-slate-400">업태 (주업종)</label>
+              <label className="text-[11px] text-slate-400">업태 (주업종) *</label>
               {isEditing ? (
                 <input
                   type="text"
                   value={formData.businessType}
                   onChange={(e) => handleChange('businessType', e.target.value)}
+                  placeholder="예: 정보통신업, 음식점업"
                   className="w-full text-xs px-3 py-2 input-clean"
+                  required
                 />
               ) : (
                 <div className="text-xs font-semibold text-amber-300 px-3 py-2 rounded-xl bg-amber-950/20 border border-amber-500/20 truncate">
-                  {formData.businessType}
+                  {formData.businessType || "미입력 (수정 클릭)"}
                 </div>
               )}
             </div>
 
             <div className="space-y-1">
-              <label className="text-[11px] text-slate-400">세부 종목</label>
+              <label className="text-[11px] text-slate-400">세부 종목 *</label>
               {isEditing ? (
                 <input
                   type="text"
                   value={formData.itemType}
                   onChange={(e) => handleChange('itemType', e.target.value)}
+                  placeholder="예: 소프트웨어 개발, 한식"
                   className="w-full text-xs px-3 py-2 input-clean"
+                  required
                 />
               ) : (
                 <div className="text-xs font-semibold text-purple-300 px-3 py-2 rounded-xl bg-purple-950/20 border border-purple-500/20 truncate">
-                  {formData.itemType}
+                  {formData.itemType || "미입력 (수정 클릭)"}
                 </div>
               )}
             </div>
@@ -187,20 +216,21 @@ export default function ResultStep({ initialData, onConfirm, onBack }) {
                 type="text"
                 value={formData.address}
                 onChange={(e) => handleChange('address', e.target.value)}
+                placeholder="예: 서울특별시 강남구 테헤란로 152"
                 className="w-full text-xs px-3 py-2 input-clean"
               />
             ) : (
               <div className="text-xs font-medium text-slate-300 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800">
-                {formData.address}
+                {formData.address || "서울특별시 강남구 테헤란로 152"}
               </div>
             )}
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 px-4 btn-primary text-xs font-bold flex items-center justify-center gap-1.5 mt-2"
+            className="w-full py-3.5 px-4 btn-primary text-xs font-bold flex items-center justify-center gap-1.5 mt-2"
           >
-            <span>3대 핵심 분석(Gemini/Naver/NotebookLM) 시작하기</span>
+            <span>4대 종합 분석(Gemini/Naver/NotebookLM/AML) 시작하기</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>

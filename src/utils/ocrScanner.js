@@ -488,18 +488,26 @@ export async function runOCRScan(imageSource, onProgress) {
 
     if (onProgress) onProgress({ status: 'initializing', progress: 0.35, message: '국세청 양식 인공지능 OCR 엔진 가동 중...' });
 
-    const worker = await createWorker('kor+eng', 1, {
-      logger: (m) => {
-        if (m.status === 'recognizing text' && onProgress) {
-          const p = 0.4 + (m.progress || 0) * 0.45;
-          onProgress({
-            status: 'scanning',
-            progress: Math.min(0.88, p),
-            message: `사업자등록증 정밀 판독 중... (${Math.round((m.progress || 0) * 100)}%)`
-          });
+    let worker;
+    try {
+      // Primary: Multi-Language worker
+      worker = await createWorker('kor+eng', 1, {
+        logger: (m) => {
+          if (m.status === 'recognizing text' && onProgress) {
+            const p = 0.4 + (m.progress || 0) * 0.45;
+            onProgress({
+              status: 'scanning',
+              progress: Math.min(0.88, p),
+              message: `사업자등록증 정밀 판독 중... (${Math.round((m.progress || 0) * 100)}%)`
+            });
+          }
         }
-      }
-    });
+      });
+    } catch (wErr) {
+      console.warn("[OCR Client] Primary worker failed, initializing fallback kor worker:", wErr);
+      // Fallback: Single language kor worker
+      worker = await createWorker('kor', 1);
+    }
 
     if (onProgress) onProgress({ status: 'scanning', progress: 0.55, message: '문서 텍스트 획 및 항목 추출 분석 진행 중...' });
 
@@ -514,21 +522,28 @@ export async function runOCRScan(imageSource, onProgress) {
 
     return parsedData;
   } catch (error) {
-    console.warn("[OCR Client] Tesseract fallback triggered:", error);
+    console.warn("[OCR Client] OCR worker exception caught:", error);
+    // Return clean user-editable object without hardcoded fake sample values
+    const todayYMD = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const todayFmt = `${new Date().getFullYear()}년 ${new Date().getMonth() + 1}월 ${new Date().getDate()}일`;
+
     return {
-      regNumber: "214-88-91234",
+      regNumber: "",
       corpRegNumber: "",
-      companyName: "소문난 맛집",
-      representative: "김민수",
-      registrationDate: "20220315",
-      formattedDate: "2022년 03월 15일",
-      issueDate: "2022년 03월 15일",
-      address: "서울특별시 강남구 테헤란로 152",
-      businessType: "음식점업",
-      itemType: "한식 및 외식 서비스",
+      companyName: "",
+      representative: "",
+      registrationDate: todayYMD,
+      formattedDate: todayFmt,
+      issueDate: todayFmt,
+      address: "",
+      businessType: "",
+      itemType: "",
       taxType: "부가가치세 일반과세자",
       isHeadOffice: true,
-      rawOCRText: "Fallback OCR Engine Result"
+      rawOCRText: "",
+      isParsedAnything: false,
+      needsManualEntry: true
     };
   }
 }
+
