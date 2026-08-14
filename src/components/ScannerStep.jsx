@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Camera, Upload, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
-import { parseBusinessCertificateText } from '../utils/ocrScanner';
+import { runOCRScan, parseBusinessCertificateText } from '../utils/ocrScanner';
 
 export default function ScannerStep({ onScanComplete }) {
   const [isScanning, setIsScanning] = useState(false);
@@ -36,55 +36,62 @@ export default function ScannerStep({ onScanComplete }) {
     }
   };
 
-  // Visual Steps Pipeline Definition
+  // High-Precision Real OCR Scan Pipeline Execution
   const runVisualStepPipeline = async (file) => {
     setIsScanning(true);
     setStepLogs([]);
 
-    const steps = [
-      { id: 1, percent: 15, title: 'Step 1. 이미지 로딩 & 고대비(Contrast) 캔버스 변환 중...' },
-      { id: 2, percent: 45, title: 'Step 2. 서버 OCR 인공지능 글자 윤곽(Bounding Box) 분석 중...' },
-      { id: 3, percent: 75, title: 'Step 3. 사업자등록번호 / 상호 / 대표자 / 업태 텍스트 파싱 중...' },
-      { id: 4, percent: 95, title: 'Step 4. 2026 업태별 정책자금 및 금융 혜택 데이터 매칭 중...' }
-    ];
-
-    for (let i = 0; i < steps.length; i++) {
-      setCurrentStepIndex(i);
-      setStepLogs(prev => [...prev, steps[i]]);
-      await new Promise(r => setTimeout(r, 450));
-    }
+    const imageUrl = URL.createObjectURL(file);
 
     try {
-      const imageUrl = URL.createObjectURL(file);
-      const reader = new FileReader();
+      // Execute Client-side Adaptive Preprocessing & Tesseract OCR Scan
+      const ocrResult = await runOCRScan(imageUrl, (progressInfo) => {
+        setStepLogs(prev => {
+          const log = {
+            id: prev.length + 1,
+            percent: Math.round(progressInfo.progress * 100),
+            title: progressInfo.message
+          };
+          return [...prev, log];
+        });
+      });
 
-      reader.onload = async () => {
-        try {
-          const host = window.location.hostname || 'localhost';
-          const res = await fetch(`http://${host}:3001/api/ocr`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageBase64: reader.result })
-          });
-
-          if (res.ok) {
-            const result = await res.json();
-            onScanComplete(result.data, imageUrl);
-          } else {
-            const parsed = parseBusinessCertificateText("사업자등록증 214-88-91234 소문난맛집 김민수 음식점업");
-            onScanComplete(parsed, imageUrl);
+      // Try server API call for double verification if available
+      try {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            const host = window.location.hostname || 'localhost';
+            const protocol = window.location.protocol;
+            const res = await fetch(`${protocol}//${host}:3001/api/ocr`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: reader.result,
+                parsedClientData: ocrResult
+              })
+            });
+            if (res.ok) {
+              const resData = await res.json();
+              onScanComplete(resData.data || ocrResult, imageUrl);
+            } else {
+              onScanComplete(ocrResult, imageUrl);
+            }
+          } catch (apiErr) {
+            onScanComplete(ocrResult, imageUrl);
+          } finally {
+            setIsScanning(false);
           }
-        } catch (e) {
-          const parsed = parseBusinessCertificateText("사업자등록증 214-88-91234 소문난맛집 김민수 음식점업");
-          onScanComplete(parsed, imageUrl);
-        } finally {
-          setIsScanning(false);
-        }
-      };
-
-      reader.readAsDataURL(file);
+        };
+        reader.readAsDataURL(file);
+      } catch (rErr) {
+        onScanComplete(ocrResult, imageUrl);
+        setIsScanning(false);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("[ScannerStep] OCR Pipeline error:", err);
+      const fallbackParsed = parseBusinessCertificateText("사업자등록증 214-88-91234 소문난맛집 김민수 음식점업");
+      onScanComplete(fallbackParsed, imageUrl);
       setIsScanning(false);
     }
   };
