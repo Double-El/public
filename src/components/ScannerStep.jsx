@@ -37,69 +37,68 @@ export default function ScannerStep({ onScanComplete }) {
   };
 
   // High-Precision Real OCR Scan Pipeline Execution
-  const runVisualStepPipeline = async (file) => {
+  const runVisualStepPipeline = (file) => {
     if (!file) return;
     setIsScanning(true);
     setStepLogs([]);
 
-    const imageUrl = URL.createObjectURL(file);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const imageUrl = e.target.result;
 
-    try {
-      // Execute Client-side Adaptive Preprocessing & Gemini 2.5/2.0 OCR Scan
-      const ocrResult = await runOCRScan(imageUrl, (progressInfo) => {
-        setStepLogs(prev => {
-          const log = {
-            id: prev.length + 1,
-            percent: Math.round(progressInfo.progress * 100),
-            title: progressInfo.message
-          };
-          return [...prev, log];
-        });
-      });
-
-      // Immediately pass results to complete step without blocking on background network calls
-      onScanComplete(ocrResult || {
-        regNumber: "214-88-91234",
-        companyName: "스캔된 사업장",
-        representative: "대표자명",
-        businessType: "음식점업",
-        itemType: "한식 및 외식 서비스",
-        formattedDate: "2022년 03월 15일",
-        taxType: "부가가치세 일반과세자"
-      }, imageUrl);
-
-      // Asynchronous non-blocking double-verification via Vercel/Local API if available
       try {
-        const reader = new FileReader();
-        reader.onload = async () => {
-          try {
-            const apiEndpoint = window.location.hostname === 'localhost'
-              ? `http://localhost:3001/api/ocr`
-              : `/api/ocr`;
+        // Execute Client-side Adaptive Preprocessing & Gemini 3.6 Flash OCR Scan
+        const ocrResult = await runOCRScan(imageUrl, (progressInfo) => {
+          setStepLogs(prev => {
+            const log = {
+              id: prev.length + 1,
+              percent: Math.round(progressInfo.progress * 100),
+              title: progressInfo.message
+            };
+            return [...prev, log];
+          });
+        });
 
-            await fetch(apiEndpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                imageBase64: reader.result,
-                parsedClientData: ocrResult
-              })
-            });
-          } catch (e) {
-            // Ignore background API error
-          }
-        };
-        reader.readAsDataURL(file);
-      } catch (e) {
-        // Ignore background reader error
+        // Immediately pass results & persistent image Data URL to complete step
+        onScanComplete(ocrResult || {
+          regNumber: "214-88-91234",
+          companyName: "스캔된 사업장",
+          representative: "대표자명",
+          businessType: "음식점업",
+          itemType: "한식 및 외식 서비스",
+          formattedDate: "2022년 03월 15일",
+          taxType: "부가가치세 일반과세자"
+        }, imageUrl);
+
+        // Asynchronous non-blocking double-verification via Vercel/Local API if available
+        try {
+          const apiEndpoint = window.location.hostname === 'localhost'
+            ? `http://localhost:3001/api/ocr`
+            : `/api/ocr`;
+
+          fetch(apiEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageBase64: imageUrl,
+              parsedClientData: ocrResult
+            })
+          }).catch(() => {});
+        } catch (e) {
+          // Ignore background API error
+        }
+      } catch (err) {
+        console.error("[ScannerStep] OCR Pipeline error:", err);
+        const fallbackParsed = parseBusinessCertificateText("사업자등록증 214-88-91234 소문난맛집 김민수 음식점업");
+        onScanComplete(fallbackParsed, imageUrl);
+      } finally {
+        setIsScanning(false);
       }
-    } catch (err) {
-      console.error("[ScannerStep] OCR Pipeline error:", err);
-      const fallbackParsed = parseBusinessCertificateText("사업자등록증 214-88-91234 소문난맛집 김민수 음식점업");
-      onScanComplete(fallbackParsed, imageUrl);
-    } finally {
+    };
+    reader.onerror = () => {
       setIsScanning(false);
-    }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
