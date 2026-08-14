@@ -235,7 +235,7 @@ export default function ScannerStep({ onScanComplete }) {
                           <Upload className="w-6 h-6 text-[#bae6fd] drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
                         </div>
                         <div className="text-base font-extrabold tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-                          사진 / 파일 업로드
+                          사진 파일 업로드
                         </div>
                       </div>
 
