@@ -14,7 +14,7 @@ export default function App() {
   const [scannedImage, setScannedImage] = useState(null);
   const [financialList, setFinancialList] = useState([]);
   const [industryData, setIndustryData] = useState(null);
-  const [isAutoMode, setIsAutoMode] = useState(true); // Default 1-Touch Auto Email Dispatch
+  const [isAutoMode, setIsAutoMode] = useState(false); // Default to Manual Verification Step
   const [autoSentMessage, setAutoSentMessage] = useState('');
 
   // Reset to Step 1
@@ -27,7 +27,7 @@ export default function App() {
     setAutoSentMessage('');
   };
 
-  // Run full automatic pipeline: OCR Scan -> 3-Pillar Analysis -> Direct Email Dispatch
+  // Run pipeline: Save OCR scan data -> Step 2 (Information Verification & Edit)
   const runAutoPipeline = async (parsedData, imageUrl) => {
     setCertData(parsedData);
     setScannedImage(imageUrl);
@@ -37,27 +37,11 @@ export default function App() {
     setFinancialList(finList);
     setIndustryData(indData);
 
-    if (isAutoMode) {
-      // Auto-send email to default recipient e.factorials@gmail.com
-      try {
-        const sendResult = await sendEmailReport({
-          recipientEmail: 'e.factorials@gmail.com',
-          certData: parsedData,
-          financialList: finList,
-          industryData: indData
-        });
-        setAutoSentMessage(sendResult.message || 'e.factorials@gmail.com 으로 리포트가 자동 전송되었습니다!');
-      } catch (err) {
-        console.warn("Auto email dispatch error:", err);
-        setAutoSentMessage('e.factorials@gmail.com 으로 자동 메일 전송이 준비되었습니다.');
-      }
-      setCurrentStep(4); // Jump directly to completion & email view
-    } else {
-      setCurrentStep(2); // Manual step-by-step confirmation
-    }
+    // ALWAYS navigate to Step 2 so user can verify & edit parsed fields first
+    setCurrentStep(2);
   };
 
-  // Step 1 -> Step 2 / Step 4
+  // Step 1 -> Step 2
   const handleScanComplete = (parsedData, imageUrl) => {
     runAutoPipeline(parsedData, imageUrl);
   };
@@ -103,6 +87,7 @@ export default function App() {
         {currentStep === 2 && certData && (
           <ResultStep
             initialData={certData}
+            scannedImage={scannedImage}
             onConfirm={handleConfirmCertData}
             onBack={() => setCurrentStep(1)}
           />
