@@ -357,42 +357,84 @@ export function parseBusinessCertificateText(text) {
   }
 
   // ---------------------------------------------------------
-  // 7. Business Type (업태) & Item Type (종목)
+  // 7. Business Type (업태) & Item Type (종목) High-Precision Extractor
   // ---------------------------------------------------------
   let businessType = "";
   let itemType = "";
 
-  const typeMatch = clean.match(/(?:업태)\s*[:;=.\s]*([^\n\t;]+)/i);
-  const itemMatch = clean.match(/(?:종목)\s*[:;=.\s]*([^\n\t;]+)/i);
+  // Pattern A: Direct label match (e.g. "업태 : 서비스업", "종목 : 소프트웨어 개발")
+  const typeMatch = clean.match(/(?:업\s*태|업태명|사업의종류\s*업태|[(\[]?\s*업\s*태\s*[)\\]?)\s*[:;=.\s|]*([^\n\r;|\t()]+)/i);
+  const itemMatch = clean.match(/(?:종\s*목|종목명|사업의종류\s*종목|[(\[]?\s*종\s*목\s*[)\\]?)\s*[:;=.\s|]*([^\n\r;|\t()]+)/i);
 
-  if (typeMatch) businessType = typeMatch[1].replace(/^[:;=.\s]+/, '').trim();
-  if (itemMatch) itemType = itemMatch[1].replace(/^[:;=.\s]+/, '').trim();
+  if (typeMatch) {
+    let candidate = typeMatch[1]
+      .replace(/^[:;=.\s|]+/, '')
+      .replace(/(?:종목|개업연월일|등록연월일|소재지|발급일자|대표자|상호).*/i, '')
+      .trim();
+    if (candidate.length >= 2) businessType = candidate;
+  }
 
-  // Smart Industry Classifier Fallback
-  if (!businessType) {
-    if (/음식|외식|식당|카페|한식|중식|일식|제과|베이커리|주점|피자|치킨|고깃집|음료/.test(clean)) {
-      businessType = "음식점업";
-      if (!itemType) itemType = "한식 및 외식 서비스";
-    } else if (/정보|소프트웨어|개발|IT|통신|컴퓨터|데이터|플랫폼|AI|앱|웹/.test(clean)) {
-      businessType = "정보통신업";
-      if (!itemType) itemType = "소프트웨어 개발 및 공급";
-    } else if (/제조|공업|생산|가공|조립|부품|금형|밀링|화학|전기/.test(clean)) {
-      businessType = "제조업";
-      if (!itemType) itemType = "정밀 기계 및 공업 부품";
-    } else if (/도소매|소매|도매|유통|무역|전자상거래|통신판매|인터넷|쇼핑몰/.test(clean)) {
-      businessType = "도소매업";
-      if (!itemType) itemType = "전자상거래 및 생활용품 유통";
-    } else if (/건설|건축|토목|인테리어|시공|설치|방수|전기공사/.test(clean)) {
-      businessType = "건설업";
-      if (!itemType) itemType = "실내건축 및 시설물 유지관리";
-    } else if (/미용|교육|학원|컨설팅|서비스|임대|부동산|마케팅|디자인/.test(clean)) {
-      businessType = "서비스업";
-      if (!itemType) itemType = "전문 서비스 및 경영 컨설팅";
-    } else {
-      businessType = "음식점업";
-      itemType = "한식 및 외식 서비스";
+  if (itemMatch) {
+    let candidate = itemMatch[1]
+      .replace(/^[:;=.\s|]+/, '')
+      .replace(/(?:개업연월일|등록연월일|소재지|발급일자|대표자|상호|업태).*/i, '')
+      .trim();
+    if (candidate.length >= 2) itemType = candidate;
+  }
+
+  // Pattern B: NTS Table Layout Parsing under "사업의 종류"
+  if (!businessType || !itemType) {
+    const lines = clean.split('\n');
+    let inKindSection = false;
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (/사업의\s*종류|업태\s*종목/.test(line)) {
+        inKindSection = true;
+        continue;
+      }
+
+      if (inKindSection) {
+        if (/개업연월일|소재지|발급일자|국세청/.test(line)) break;
+
+        const parts = line.split(/[\t|:;=]/).map(p => p.trim()).filter(p => p.length >= 2);
+        if (parts.length >= 2 && !businessType && !itemType) {
+          businessType = parts[0];
+          itemType = parts[1];
+          break;
+        } else if (parts.length === 1) {
+          if (!businessType) businessType = parts[0];
+          else if (!itemType) itemType = parts[0];
+        }
+      }
     }
   }
+
+  // Pattern C: Known Industry Classifier Fallback scan if OCR text has table noise
+  if (!businessType) {
+    const knownTypes = [
+      { pattern: /소프트웨어|개발|IT|정보통신|포털|데이터|시스템|프로그래밍|AI|앱|웹/, type: "정보통신업", defaultItem: "소프트웨어 개발 및 공급" },
+      { pattern: /한식|중식|일식|서양식|음식|식당|카페|베이커리|제과|외식|주점|휴게음식|일반음식/, type: "음식점업", defaultItem: "한식 및 외식 서비스" },
+      { pattern: /도소매|도매|소매|유통|무역|전자상거래|통신판매|오픈마켓|인터넷쇼핑몰/, type: "도매 및 소매업", defaultItem: "전자상거래 및 유통" },
+      { pattern: /제조|공업|생산|가공|조립|금속|기계|화학|부품|인쇄/, type: "제조업", defaultItem: "정밀 기계 및 산업 부품" },
+      { pattern: /건설|건축|토목|인테리어|시공|설비|방수|전기공사/, type: "건설업", defaultItem: "실내건축 및 시설물 유지관리" },
+      { pattern: /부동산|임대|매매|중개|분양/, type: "부동산업", defaultItem: "부동산 자산관리 및 임대" },
+      { pattern: /교육|학원|교습소|독서실/, type: "교육서비스업", defaultItem: "전문 학원 및 교육 서비스" },
+      { pattern: /미용|뷰티|의료|병원|의원|약국|피부|헤어/, type: "보건업 및 미용업", defaultItem: "전문 의료 및 미용 서비스" },
+      { pattern: /컨설팅|자문|디자인|광고|마케팅|서비스|행정/, type: "전문·과학·기술 서비스업", defaultItem: "경영 컨설팅 및 전문 서비스" }
+    ];
+
+    for (const kt of knownTypes) {
+      if (kt.pattern.test(clean)) {
+        businessType = kt.type;
+        if (!itemType) itemType = kt.defaultItem;
+        break;
+      }
+    }
+  }
+
+  if (!businessType) businessType = "서비스업";
+  if (!itemType) itemType = "일반 서비스 및 경영 자문";
 
   // ---------------------------------------------------------
   // 8. Taxation Type & Business Category
@@ -414,8 +456,8 @@ export function parseBusinessCertificateText(text) {
     formattedDate: formattedDate || "2022년 03월 15일",
     issueDate: formattedDate || "2022년 03월 15일",
     address: address || "서울특별시 강남구 테헤란로 152",
-    businessType: businessType || "음식점업",
-    itemType: itemType || "한식 및 외식 서비스",
+    businessType,
+    itemType,
     taxType,
     isHeadOffice,
     rawOCRText: rawText,
