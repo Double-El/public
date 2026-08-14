@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Upload, CheckCircle2, RefreshCw, Loader2, Sparkles, ChevronRight, Image, FileText, Zap } from 'lucide-react';
-import { runOCRScan, parseBusinessCertificateText, PRESET_SAMPLES } from '../utils/ocrScanner';
+import { Camera, Upload, CheckCircle2, RefreshCw, Loader2, Sparkles, ChevronRight, Image, FileText } from 'lucide-react';
+import { runOCRScan, parseBusinessCertificateText } from '../utils/ocrScanner';
 
-export default function ScannerStep({ onScanComplete, onSelectPreset }) {
+export default function ScannerStep({ onScanComplete }) {
   const [isScanning, setIsScanning] = useState(false);
 
   // Real-time Visual Step Progress State
@@ -253,47 +253,6 @@ export default function ScannerStep({ onScanComplete, onSelectPreset }) {
           <div className="flex items-center justify-between text-[9px] font-mono text-[#b3a3f8]/50 pt-2 border-t border-[#b3a3f8]/15">
             <span>[AUTO-FRAME]</span>
             <span>SIGNS AI CERT ENGINE v2.718</span>
-          </div>
-        </div>
-
-        {/* 1-Click Fast Test Sample Section */}
-        <div className="glass-panel rounded-2xl p-3 border border-indigo-500/30 bg-indigo-950/20 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-indigo-300 flex items-center gap-1">
-              <Zap className="w-3.5 h-3.5 text-amber-400" /> 1초 원클릭 테스트 샘플로 보고서 즉시 생성
-            </span>
-            <span className="text-[9px] text-slate-400 font-mono">5개 샘플</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-            {PRESET_SAMPLES.map((sample) => (
-              <button
-                key={sample.id}
-                onClick={() => {
-                  if (onSelectPreset) {
-                    onSelectPreset(sample.data);
-                  } else {
-                    onScanComplete(sample.data, null);
-                  }
-                }}
-                className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-indigo-500/50 text-left transition-all group flex items-center justify-between"
-              >
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                      {sample.tag}
-                    </span>
-                  </div>
-                  <h4 className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors pt-1">
-                    {sample.name}
-                  </h4>
-                  <p className="text-[10px] text-slate-400 truncate">
-                    {sample.data.representative} 대표 · {sample.data.businessType}
-                  </p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
-              </button>
-            ))}
           </div>
         </div>
 
