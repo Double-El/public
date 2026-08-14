@@ -4,7 +4,7 @@ import { getRecommendedFinancialServices } from '../data/financialRules';
 import { getIndustryIssueData } from '../data/industryIssues';
 import { AGENT_PERSONA, runAgentReasoningChain, askAgentQuestion, getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist } from '../utils/aiAgentEngine';
 
-export default function AnalysisStep({ certData, autoSentMessage, onProceedToEmail }) {
+export default function AnalysisStep({ certData, scannedImage, autoSentMessage, onProceedToEmail }) {
   const [activeTab, setActiveTab] = useState('gemini_financial'); // 'gemini_financial' | 'naver_issues' | 'notebook_insider' | 'aml_checklist' | 'chat'
   const [selectedFilter, setSelectedFilter] = useState('ALL');
   
@@ -77,6 +77,27 @@ export default function AnalysisStep({ certData, autoSentMessage, onProceedToEma
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-6 pb-28">
+      {/* Uploaded Business Registration Certificate Image Display Card */}
+      {scannedImage && (
+        <div className="glass-panel rounded-2xl p-4 border border-[#b3a3f8]/40 bg-[#0c091d]/90 space-y-2.5 shadow-2xl shadow-[#674ddb]/20">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#eeeaff] flex items-center gap-2">
+              📸 스캔 판독된 원본 사업자등록증 사진
+            </span>
+            <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-[#674ddb]/30 text-[#b3a3f8] border border-[#b3a3f8]/30">
+              GEMINI 3.6 VISION TARGET
+            </span>
+          </div>
+          <div className="relative rounded-xl overflow-hidden border border-[#b3a3f8]/30 bg-black/60 max-h-80 flex items-center justify-center p-1 group">
+            <img
+              src={scannedImage}
+              alt="촬영/업로드된 사업자등록증 원본 사진"
+              className="w-full h-auto max-h-80 object-contain rounded-lg shadow-lg group-hover:scale-[1.02] transition-transform duration-300"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Auto Email Dispatch Notification Banner */}
       <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 text-xs font-semibold flex items-center gap-3 shadow-lg shadow-emerald-950/30">
         <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 animate-pulse" />

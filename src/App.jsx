@@ -111,6 +111,7 @@ export default function App() {
         {currentStep === 3 && certData && (
           <AnalysisStep
             certData={certData}
+            scannedImage={scannedImage}
             autoSentMessage={autoSentMessage}
             onProceedToEmail={handleProceedToEmail}
           />
