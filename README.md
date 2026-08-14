@@ -1,6 +1,8 @@
 # 🔮 Shinhan BIZ SCANNER by myungmin
 
-> **사업자등록증 스캔 한 번으로 2026년 정책자금·보증 대출 추천, 업태별 3대 AI 종합 분석(Gemini + Naver + Google NotebookLM), 그리고 e.factorials@gmail.com 자동 실시간 메일 전송까지 1-Touch로 처리하는 모바일 맞춤형 금융 에이전트 서비스입니다.**
+> **사업자등록증 스캔 한 번으로 2026년 정책자금·보증 대출 추천, 업태별 4대 AI 종합 분석(Gemini 3.6 Flash + Naver + Google NotebookLM + AML), 그리고 e.factorials@gmail.com 자동 실시간 메일 전송까지 1-Touch로 처리하는 모바일 맞춤형 금융 에이전트 서비스입니다.**
+
+👉 **라이브 배포 서비스 (Vercel)**: [https://biz-scanner-one.vercel.app](https://biz-scanner-one.vercel.app)
 
 ---
 
