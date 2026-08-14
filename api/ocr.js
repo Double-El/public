@@ -17,6 +17,7 @@ export default async function handler(req, res) {
       const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
       if (apiKey) {
+        console.log("[Gemini Vision AI] GEMINI_API_KEY detected! Triggering Gemini 1.5 Flash Vision OCR...");
         try {
           const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
           const promptText = `Analyze this Korean Business Registration Certificate (사업자등록증/사업자등록증명) image with high precision.
