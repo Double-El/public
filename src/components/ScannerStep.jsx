@@ -180,7 +180,7 @@ export default function ScannerStep({ onScanComplete }) {
                   {/* Line 1: Camera Capture Button */}
                   <label
                     htmlFor="mobile-camera-file-input"
-                    className="rotating-border-box-camera w-full cursor-pointer group select-none hover:scale-[1.01] transition-all duration-300"
+                    className="rotating-border-box-camera block w-full cursor-pointer group select-none hover:scale-[1.01] transition-all duration-300"
                     onClick={(e) => {
                       if (isScanning) {
                         e.preventDefault();
@@ -214,7 +214,7 @@ export default function ScannerStep({ onScanComplete }) {
                   {/* Line 2: Photo / File Upload Button */}
                   <label
                     htmlFor="mobile-upload-file-input"
-                    className="rotating-border-box-upload w-full cursor-pointer group select-none hover:scale-[1.01] transition-all duration-300"
+                    className="rotating-border-box-upload block w-full cursor-pointer group select-none hover:scale-[1.01] transition-all duration-300"
                     onClick={(e) => {
                       if (isScanning) {
                         e.preventDefault();
