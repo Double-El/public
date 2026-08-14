@@ -514,7 +514,7 @@ export function compressImageForGemini(imageSource, maxDim = 1600, quality = 0.8
 export async function scanWithClientGeminiAPI(compressedBase64, onProgress) {
   let apiKey = "";
   try {
-    apiKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) ||
+    apiKey = (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.GEMINI_API_KEY)) ||
              (typeof process !== 'undefined' && process.env && (process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY)) ||
              "";
   } catch (e) {

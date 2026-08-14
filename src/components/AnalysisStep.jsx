@@ -4,7 +4,7 @@ import { getRecommendedFinancialServices } from '../data/financialRules';
 import { getIndustryIssueData } from '../data/industryIssues';
 import { AGENT_PERSONA, runAgentReasoningChain, askAgentQuestion, getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist } from '../utils/aiAgentEngine';
 
-export default function AnalysisStep({ certData, onProceedToEmail }) {
+export default function AnalysisStep({ certData, autoSentMessage, onProceedToEmail }) {
   const [activeTab, setActiveTab] = useState('gemini_financial'); // 'gemini_financial' | 'naver_issues' | 'notebook_insider' | 'aml_checklist' | 'chat'
   const [selectedFilter, setSelectedFilter] = useState('ALL');
   
@@ -55,12 +55,12 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
     };
 
     setChatMessages(prev => [...prev, userMsg]);
-    const currentQ = userQuery;
+    const currentQuery = userQuery;
     setUserQuery('');
     setIsAiReplying(true);
 
     try {
-      const aiReplyText = await askAgentQuestion(currentQ, certData, financialList, industryData);
+      const aiReplyText = await askAgentQuestion(certData, currentQuery, chatMessages);
       const aiMsg = {
         id: Date.now() + 1,
         sender: 'agent',
@@ -77,6 +77,19 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-6 pb-28">
+      {/* Auto Email Dispatch Notification Banner */}
+      <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 text-xs font-semibold flex items-center gap-3 shadow-lg shadow-emerald-950/30">
+        <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 animate-pulse" />
+        <div>
+          <span className="font-bold text-white block text-xs">
+            {autoSentMessage || 'e.factorials@gmail.com 및 담당 수신함으로 4대 종합 리포트 자동 발송 완료!'}
+          </span>
+          <span className="text-[10px] text-emerald-300/80 font-normal">
+            별도 클릭 없이 배경에서 즉시 실시간 이메일 전송이 처리되었습니다.
+          </span>
+        </div>
+      </div>
+
       {/* AI Agent Reasoning Status Banner */}
       <div className="glass-panel rounded-2xl p-4 border border-indigo-500/40 bg-indigo-950/30 space-y-3">
         <div className="flex items-center justify-between">
