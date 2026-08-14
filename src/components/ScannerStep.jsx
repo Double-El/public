@@ -195,7 +195,7 @@ export default function ScannerStep({ onScanComplete }) {
                     <div className="rotating-border-glow-camera" />
 
                     {/* Inner Sleek Dark Glass Surface */}
-                    <div className="relative z-10 w-full py-4.5 px-5 rounded-[1.1rem] btn-fancy-camera text-white flex items-center justify-between gap-3">
+                    <div className="relative z-10 w-full py-4.5 px-5 btn-fancy-camera text-white flex items-center justify-between gap-3">
                       <div className="flex items-center gap-4 relative z-10">
                         <div className="w-11 h-11 rounded-xl bg-[#a855f7]/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border border-[#a855f7]/50 shadow-[0_0_12px_rgba(168,85,247,0.4)] group-hover:scale-110 transition-transform duration-300">
                           <Camera className="w-6 h-6 text-[#e9d5ff] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
@@ -229,7 +229,7 @@ export default function ScannerStep({ onScanComplete }) {
                     <div className="rotating-border-glow-upload" />
 
                     {/* Inner Sleek Dark Glass Surface */}
-                    <div className="relative z-10 w-full py-4.5 px-5 rounded-[1.1rem] btn-fancy-upload text-white flex items-center justify-between gap-3">
+                    <div className="relative z-10 w-full py-4.5 px-5 btn-fancy-upload text-white flex items-center justify-between gap-3">
                       <div className="flex items-center gap-4 relative z-10">
                         <div className="w-11 h-11 rounded-xl bg-[#38bdf8]/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border border-[#38bdf8]/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] group-hover:scale-110 transition-transform duration-300">
                           <Upload className="w-6 h-6 text-[#bae6fd] drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
