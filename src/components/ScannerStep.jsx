@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Camera, Upload, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
+import { Camera, Upload, CheckCircle2, RefreshCw, Loader2, Sparkles, ChevronRight, Image, FileText } from 'lucide-react';
 import { runOCRScan, parseBusinessCertificateText } from '../utils/ocrScanner';
 
 export default function ScannerStep({ onScanComplete }) {
@@ -104,9 +104,8 @@ export default function ScannerStep({ onScanComplete }) {
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className={`relative overflow-hidden card-clean p-6 text-center border-2 ${
-            isDragging ? 'border-[#b3a3f8] bg-[#1a133d]/90 scale-[1.01]' : 'border-[#b3a3f8]/30 bg-[#0c091d]/90'
-          } scanner-grid-bg transition-all duration-300 shadow-2xl shadow-[#674ddb]/20 group rounded-3xl`}
+          className={`relative overflow-hidden card-clean p-6 text-center border-2 ${isDragging ? 'border-[#b3a3f8] bg-[#1a133d]/90 scale-[1.01]' : 'border-[#b3a3f8]/30 bg-[#0c091d]/90'
+            } scanner-grid-bg transition-all duration-300 shadow-2xl shadow-[#674ddb]/20 group rounded-3xl`}
         >
           {/* 1. Camera Capture Input (Mobile Camera direct trigger) */}
           <input
@@ -171,12 +170,13 @@ export default function ScannerStep({ onScanComplete }) {
               </div>
             ) : (
               <div className="space-y-3.5">
-                <p className="text-xs text-[#b3a3f8]/90 font-medium">
-                  사업자등록증 촬영 또는 앨범의 사진을 업로드해 주세요
+                <p className="text-xs text-[#b3a3f8]/90 font-medium flex items-center justify-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#b3a3f8] animate-pulse" />
+                  사업자등록증을 촬영하거나 앨범에서 선택해 주세요
                 </p>
 
-                {/* Clearly Separated Action Buttons */}
-                <div className="space-y-3 pt-1 w-full">
+                {/* Ultra-Fancy SIGNS AI Action Buttons */}
+                <div className="space-y-3.5 pt-1 w-full">
                   {/* Button 1: Camera Capture */}
                   <button
                     type="button"
@@ -185,20 +185,29 @@ export default function ScannerStep({ onScanComplete }) {
                       e.stopPropagation();
                       cameraInputRef.current?.click();
                     }}
-                    className="w-full py-3.5 px-4 rounded-2xl btn-primary text-[#eeeaff] shadow-lg shadow-[#674ddb]/30 flex items-center justify-between gap-3 hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer border border-[#b3a3f8]/30 group"
+                    className="relative overflow-hidden w-full py-4 px-4 rounded-2xl btn-fancy-camera text-white flex items-center justify-between gap-3 cursor-pointer group"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-                        <Camera className="w-4 h-4 text-[#eeeaff]" />
+                    <div className="flex items-center gap-3.5 relative z-10">
+                      <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center flex-shrink-0 border border-white/30 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                        <Camera className="w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
                       </div>
                       <div className="text-left">
-                        <div className="text-xs font-bold tracking-wide text-[#eeeaff]">사업자등록증 사진 촬영</div>
-                        <div className="text-[10px] text-[#eeeaff]/80 font-normal">모바일 카메라로 직접 촬영하여 스캔</div>
+                        <div className="text-sm font-bold tracking-wide text-white drop-shadow-sm">
+                          사업자등록증 사진 촬영
+                        </div>
+                        <div className="text-[11px] text-white/80 font-normal">
+
+                        </div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono font-bold bg-white/20 px-2 py-1 rounded-lg text-[#eeeaff] flex-shrink-0">
-                      카메라
-                    </span>
+
+                    <div className="flex items-center gap-1.5 relative z-10 flex-shrink-0">
+                      <span className="text-[10px] font-mono font-bold bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-xl text-white border border-white/30 shadow-sm flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#52ff99] animate-ping" />
+
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </button>
 
                   {/* Button 2: Photo / File Upload */}
@@ -209,20 +218,29 @@ export default function ScannerStep({ onScanComplete }) {
                       e.stopPropagation();
                       uploadInputRef.current?.click();
                     }}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-[#1e1740]/90 hover:bg-[#281f54] active:scale-[0.98] text-[#b3a3f8] hover:text-[#eeeaff] border border-[#b3a3f8]/40 hover:border-[#b3a3f8] flex items-center justify-between gap-3 transition-all cursor-pointer shadow-md group"
+                    className="relative overflow-hidden w-full py-4 px-4 rounded-2xl btn-fancy-upload text-white flex items-center justify-between gap-3 cursor-pointer group"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-xl bg-[#b3a3f8]/10 group-hover:bg-[#b3a3f8]/20 flex items-center justify-center flex-shrink-0">
-                        <Upload className="w-4 h-4 text-[#b3a3f8] group-hover:text-[#eeeaff]" />
+                    <div className="flex items-center gap-3.5 relative z-10">
+                      <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-md flex items-center justify-center flex-shrink-0 border border-white/30 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                        <Upload className="w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
                       </div>
                       <div className="text-left">
-                        <div className="text-xs font-bold tracking-wide text-[#eeeaff]">사진 / 파일 업로드</div>
-                        <div className="text-[10px] text-[#b3a3f8]/80 group-hover:text-[#eeeaff]/80 font-normal">앨범이나 파일 보관함에서 선택</div>
+                        <div className="text-sm font-bold tracking-wide text-white drop-shadow-sm">
+                          사진 / 파일 업로드
+                        </div>
+                        <div className="text-[11px] text-white/80 font-normal">
+
+                        </div>
                       </div>
                     </div>
-                    <span className="text-[10px] font-mono font-bold bg-[#b3a3f8]/20 px-2 py-1 rounded-lg text-[#b3a3f8] group-hover:text-[#eeeaff] flex-shrink-0">
-                      앨범
-                    </span>
+
+                    <div className="flex items-center gap-1.5 relative z-10 flex-shrink-0">
+                      <span className="text-[10px] font-mono font-bold bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-xl text-white border border-white/30 shadow-sm flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-ping" />
+
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-white/70 group-hover:translate-x-1 transition-transform" />
+                    </div>
                   </button>
                 </div>
               </div>
