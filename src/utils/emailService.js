@@ -121,23 +121,11 @@ export async function sendEmailReport({ recipientEmail, certData, financialList,
     console.warn("Backend server API unreachable, attempting mobile mail dispatch:", err);
   }
 
-  // 2. Mobile Mail App Auto Trigger (Guaranteed 100% Delivery to e.factorials@gmail.com)
-  try {
-    window.location.href = mailtoUrl;
-    return {
-      success: true,
-      method: 'mailto',
-      message: `${targetEmail} 수신함으로 이동하도록 스마트폰 메일 앱(Gmail)을 실행했습니다.`,
-      mailtoUrl: mailtoUrl
-    };
-  } catch (e) {
-    console.warn("Mailto trigger error:", e);
-  }
-
+  // 2. Return fallback mailto readiness status without unloading page
   return {
     success: true,
-    method: 'mailto',
-    message: `${targetEmail} 수신 리포트 발송 준비가 완료되었습니다.`,
+    method: 'ready',
+    message: `${targetEmail} 수신용 4대 맞춤 분석 리포트가 완성되었습니다!`,
     mailtoUrl: mailtoUrl
   };
 }

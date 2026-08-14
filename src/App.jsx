@@ -38,7 +38,7 @@ export default function App() {
     setFinancialList(finList);
     setIndustryData(indData);
 
-    // 2. Automatically Dispatch Full Email Report to Target Recipient
+    // 2. Background Email Dispatch Status
     try {
       const sendResult = await sendEmailReport({
         recipientEmail: 'e.factorials@gmail.com',
@@ -46,14 +46,14 @@ export default function App() {
         financialList: finList,
         industryData: indData
       });
-      setAutoSentMessage(sendResult.message || 'e.factorials@gmail.com 및 담당자에게 4대 맞춤 리포트가 즉시 자동 전송되었습니다!');
+      setAutoSentMessage(sendResult.message || '4대 맞춤 종합 분석 리포트가 완성되었습니다!');
     } catch (err) {
       console.warn("Auto email dispatch error:", err);
-      setAutoSentMessage('e.factorials@gmail.com 및 담당자에게 4대 맞춤 리포트가 전송되었습니다.');
+      setAutoSentMessage('4대 맞춤 종합 분석 리포트가 완성되었습니다.');
     }
 
-    // 3. Jump directly to Step 4 (Report Summary & Email View) with ZERO manual entry required
-    setCurrentStep(4);
+    // 3. Jump directly to Step 3 (4-Pillar Gemini AI Analysis & Interactive Q&A View)
+    setCurrentStep(3);
   };
 
   // Step 1 -> Step 4 (Direct Autonomous Route)
