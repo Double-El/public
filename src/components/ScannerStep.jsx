@@ -175,12 +175,12 @@ export default function ScannerStep({ onScanComplete }) {
                   사업자등록증을 촬영하거나 앨범에서 선택해 주세요
                 </p>
 
-                {/* Action Buttons with Rotating Neon Border Glow */}
+                {/* Action Buttons with Outer Border Neon Glow */}
                 <div className="flex flex-col space-y-4 pt-2 w-full">
                   {/* Line 1: Camera Capture Button */}
                   <label
                     htmlFor="mobile-camera-file-input"
-                    className="rotating-border-box w-full cursor-pointer group select-none shadow-xl hover:scale-[1.01] transition-all duration-300"
+                    className="rotating-border-box-camera w-full cursor-pointer group select-none hover:scale-[1.01] transition-all duration-300"
                     onClick={(e) => {
                       if (isScanning) {
                         e.preventDefault();
@@ -194,19 +194,19 @@ export default function ScannerStep({ onScanComplete }) {
                     {/* Rotating Glowing Neon Laser Border */}
                     <div className="rotating-border-glow-camera" />
 
-                    {/* Inner Button Surface */}
+                    {/* Inner Sleek Dark Glass Surface */}
                     <div className="relative z-10 w-full py-4.5 px-5 rounded-[1.1rem] btn-fancy-camera text-white flex items-center justify-between gap-3">
                       <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border-2 border-white/40 shadow-md group-hover:scale-110 transition-transform duration-300">
-                          <Camera className="w-6 h-6 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
+                        <div className="w-11 h-11 rounded-xl bg-[#a855f7]/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border border-[#a855f7]/50 shadow-[0_0_12px_rgba(168,85,247,0.4)] group-hover:scale-110 transition-transform duration-300">
+                          <Camera className="w-6 h-6 text-[#e9d5ff] drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
                         </div>
                         <div className="text-base font-extrabold tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
-                          사업자등록증 사진 촬영
+                          모바일 사진 촬영
                         </div>
                       </div>
 
                       <div className="relative z-10 flex-shrink-0 flex items-center">
-                        <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+                        <ChevronRight className="w-5 h-5 text-[#c084fc] group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   </label>
@@ -214,7 +214,7 @@ export default function ScannerStep({ onScanComplete }) {
                   {/* Line 2: Photo / File Upload Button */}
                   <label
                     htmlFor="mobile-upload-file-input"
-                    className="rotating-border-box w-full cursor-pointer group select-none shadow-xl hover:scale-[1.01] transition-all duration-300"
+                    className="rotating-border-box-upload w-full cursor-pointer group select-none hover:scale-[1.01] transition-all duration-300"
                     onClick={(e) => {
                       if (isScanning) {
                         e.preventDefault();
@@ -228,11 +228,11 @@ export default function ScannerStep({ onScanComplete }) {
                     {/* Rotating Glowing Neon Laser Border */}
                     <div className="rotating-border-glow-upload" />
 
-                    {/* Inner Button Surface */}
+                    {/* Inner Sleek Dark Glass Surface */}
                     <div className="relative z-10 w-full py-4.5 px-5 rounded-[1.1rem] btn-fancy-upload text-white flex items-center justify-between gap-3">
                       <div className="flex items-center gap-4 relative z-10">
-                        <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border-2 border-white/40 shadow-md group-hover:scale-110 transition-transform duration-300">
-                          <Upload className="w-6 h-6 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
+                        <div className="w-11 h-11 rounded-xl bg-[#38bdf8]/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border border-[#38bdf8]/50 shadow-[0_0_12px_rgba(56,189,248,0.4)] group-hover:scale-110 transition-transform duration-300">
+                          <Upload className="w-6 h-6 text-[#bae6fd] drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
                         </div>
                         <div className="text-base font-extrabold tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                           사진 / 파일 업로드
@@ -240,7 +240,7 @@ export default function ScannerStep({ onScanComplete }) {
                       </div>
 
                       <div className="relative z-10 flex-shrink-0 flex items-center">
-                        <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+                        <ChevronRight className="w-5 h-5 text-[#38bdf8] group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
                   </label>
