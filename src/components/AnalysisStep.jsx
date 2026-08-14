@@ -307,7 +307,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
               </span>
             </div>
             <p className="text-xs text-slate-200 font-medium">
-              [{certData.businessType}] 현장 실무자들과 업계 베테랑들만 알고 있는 실전 세무·영업 비하인드 팁입니다.
+              [{notebookSecrets.sector || certData.businessType}] 분야 현장 실무자들과 업계 베테랑들의 NotebookLM 수집 분석 인사이트 팁입니다.
             </p>
           </div>
 
