@@ -1,274 +1,190 @@
 import React, { useState } from 'react';
-import { Building2, User, FileCode, MapPin, Calendar, Edit3, ArrowRight, ArrowLeft, ShieldCheck, CheckCircle2, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Building2, Sparkles, ArrowRight, ArrowLeft, CheckCircle2, ChevronDown } from 'lucide-react';
 
-export default function ResultStep({ initialData, onConfirm, onBack, scannedImage }) {
-  const [formData, setFormData] = useState({
-    regNumber: initialData?.regNumber || "",
-    companyName: initialData?.companyName || "",
-    representative: initialData?.representative || "",
-    businessType: initialData?.businessType || "",
-    itemType: initialData?.itemType || "",
-    taxType: initialData?.taxType || "부가가치세 일반과세자",
-    formattedDate: initialData?.formattedDate || initialData?.registrationDate || "2022년 03월 15일",
-    address: initialData?.address || "",
-    ...initialData
-  });
+// 28 Representative Korean Business Types (대한민국 28대 대표 업태 및 세부종목 분류표)
+export const REPRESENTATIVE_28_INDUSTRIES = [
+  { id: 1, label: "🍱 01. 한식/일식/중식 음식점업", bType: "음식점업", iType: "한식, 일식, 중식 식당 및 외식업" },
+  { id: 2, label: "☕ 02. 카페/베이커리/음료점업", bType: "음식점업", iType: "커피전문점, 제과 및 음료 서비스" },
+  { id: 3, label: "🍺 03. 주점/포차/외식 서비스", bType: "음식점업", iType: "주점 및 음료출장 외식업" },
+  { id: 4, label: "🛵 04. 배달전문/출장음식업", bType: "음식점업", iType: "배달음식 전문 및 출장 연회" },
+  { id: 5, label: "💻 05. 소프트웨어 개발/AI/앱", bType: "정보통신업", iType: "소프트웨어 개발 및 AI 플랫폼" },
+  { id: 6, label: "🌐 06. 웹디자인/IT시스템/DB", bType: "정보통신업", iType: "웹사이트 구축 및 시스템 통합" },
+  { id: 7, label: "🛍️ 07. 전자상거래/인터넷쇼핑몰", bType: "도매 및 소매업", iType: "통신판매업 및 온라인 유통" },
+  { id: 8, label: "📦 08. 의류/잡화 도소매업", bType: "도매 및 소매업", iType: "의류, 신발, 패션잡화 도소매" },
+  { id: 9, label: "🍎 09. 식품/농수산물 유통업", bType: "도매 및 소매업", iType: "농수축산물 및 식재료 도소매" },
+  { id: 10, label: "✈️ 10. 무역/수출입업", bType: "도매 및 소매업", iType: "수출입 무역 및 종합 유통" },
+  { id: 11, label: "⚙️ 11. 정밀기계/공업 제조업", bType: "제조업", iType: "정밀기계 부품 및 공업용 제품" },
+  { id: 12, label: "👕 12. 섬유/의류/패션 제조업", bType: "제조업", iType: "의류 봉제 및 섬유 제품 제조" },
+  { id: 13, label: "🍞 13. 식품/음료 제조업", bType: "제조업", iType: "식품 가공 및 음료 제조" },
+  { id: 14, label: "🏠 14. 실내건축/인테리어 시공", bType: "건설업", iType: "실내건축공사업 및 리모델링" },
+  { id: 15, label: "🏗️ 15. 건축/토목/전문시공", bType: "건설업", iType: "종합건설업 및 전기·설비공사" },
+  { id: 16, label: "💼 16. 경영컨설팅/자문업", bType: "전문·과학·기술 서비스업", iType: "경영 컨설팅 및 마케팅 자문" },
+  { id: 17, label: "🎨 17. 광고/마케팅/디자인", bType: "전문·과학·기술 서비스업", iType: "광고 대행 및 종합 디자인" },
+  { id: 18, label: "🏢 18. 부동산중개/자산관리", bType: "부동산업", iType: "부동산 중개 및 자산 임대 관리" },
+  { id: 19, label: "📚 19. 보습/입시/예체능 학원", bType: "교육서비스업", iType: "전문 학원 및 교습 서비스" },
+  { id: 20, label: "🏥 20. 의원/병원/약국", bType: "보건업", iType: "의료 서비스 및 약국 운영" },
+  { id: 21, label: "💈 21. 미용실/피부관리/뷰티", bType: "개인서비스업", iType: "헤어미용, 피부관리 및 네일" },
+  { id: 22, label: "🚚 22. 화물/운수/택배/물류", bType: "운수 및 창고업", iType: "화물운송 및 물류 대행" },
+  { id: 23, label: "🏨 23. 숙박/펜션/게스트하우스", bType: "숙박업", iType: "호텔, 펜션 및 숙박시설" },
+  { id: 24, label: "📸 24. 스튜디오/영상/미디어", bType: "정보통신업", iType: "사진 촬영 및 영상 제작" },
+  { id: 25, label: "🏋️ 25. 피트니스/스포츠시설", bType: "스포츠업", iType: "헬스장, 체육시설 운영" },
+  { id: 26, label: "🚗 26. 자동차정비/부품/세차", bType: "수리 및 개인서비스업", iType: "자동차 정비 및 세차" },
+  { id: 27, label: "🧹 27. 청소/방역/시설관리", bType: "사업지원 서비스업", iType: "위생 관리 및 시설 유지" },
+  { id: 28, label: "📑 28. 행정/세무/법무 서비스", bType: "전문 서비스업", iType: "행정·법률 자문 서비스" }
+];
 
-  const [showImagePreview, setShowImagePreview] = useState(false);
+export default function ResultStep({ initialData, onConfirm, onBack }) {
+  // Find matching 28 industry index or default to #1
+  const initialIndustryId = REPRESENTATIVE_28_INDUSTRIES.find(
+    item => initialData?.businessType && item.bType.includes(initialData.businessType)
+  )?.id || 1;
 
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const [selectedIndustryId, setSelectedIndustryId] = useState(initialIndustryId);
+  const selectedInd = REPRESENTATIVE_28_INDUSTRIES.find(item => item.id === Number(selectedIndustryId)) || REPRESENTATIVE_28_INDUSTRIES[0];
 
-  // Quick Pick Industry presets
-  const handleQuickPickIndustry = (bType, iType) => {
-    setFormData(prev => ({
-      ...prev,
-      businessType: bType,
-      itemType: iType
-    }));
-  };
+  const [companyName, setCompanyName] = useState(initialData?.companyName || "사업장 상호");
+  const [representative, setRepresentative] = useState(initialData?.representative || "대표자명");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onConfirm(formData);
+    onConfirm({
+      ...initialData,
+      regNumber: initialData?.regNumber || "214-88-91234",
+      companyName: companyName || "스캔 사업장",
+      representative: representative || "대표자성명",
+      taxType: initialData?.taxType || "부가가치세 일반과세자",
+      formattedDate: initialData?.formattedDate || initialData?.registrationDate || "2022년 03월 15일",
+      address: initialData?.address || "서울특별시 강남구 테헤란로 152",
+      businessType: selectedInd.bType,
+      itemType: selectedInd.iType
+    });
   };
-
-  const QUICK_INDUSTRIES = [
-    { label: "🍽️ 음식/외식업", bType: "음식점업", iType: "한식 및 외식 서비스" },
-    { label: "💻 IT/소프트웨어", bType: "정보통신업", iType: "소프트웨어 개발 및 공급" },
-    { label: "🛍️ 도소매/유통", bType: "도매 및 소매업", iType: "전자상거래 및 생활유통" },
-    { label: "🏭 제조업/공업", bType: "제조업", iType: "정밀 기계 및 산업 부품" },
-    { label: "🏗️ 건설업/인테리어", bType: "건설업", iType: "실내건축 및 시설물유지" },
-    { label: "💼 서비스/컨설팅", bType: "전문·과학·기술 서비스업", iType: "경영 컨설팅 및 자문" },
-    { label: "🏢 부동산업/임대", bType: "부동산업", iType: "부동산 자산관리 및 임대" },
-    { label: "💈 미용/의료/뷰티", bType: "보건업 및 미용업", iType: "전문 의료 및 미용 서비스" }
-  ];
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-5 pb-28">
-      {/* Navigation Header */}
+      {/* Top Header */}
       <div className="flex items-center justify-between">
         <button
           onClick={onBack}
-          className="flex items-center gap-1 text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/80 transition-all"
+          className="flex items-center gap-1 text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-xl bg-slate-800 border border-slate-700 transition-all"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> 다시 스캔
         </button>
 
-        <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-blue-400" /> 스캔 정보 검토 단계 (Step 2/3)
+        <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> 28대 업태 1-터치 자동화
         </span>
       </div>
 
-      {/* Main Step Title & Subtitle */}
+      {/* Main Title */}
       <div className="text-center space-y-1">
         <h2 className="text-lg font-bold text-white flex items-center justify-center gap-1.5">
-          <span>사업자등록증 판독 및 수정</span>
+          <span>28대 대표 업태 선택 (자동화)</span>
           <Sparkles className="w-4 h-4 text-amber-400" />
         </h2>
         <p className="text-xs text-slate-400">
-          스캔된 내용을 확인하시고 <span className="text-amber-300 font-semibold">업태</span>와 <span className="text-purple-300 font-semibold">종목</span>을 확인·수정해 주세요.
+          대표 업태 <span className="text-amber-300 font-bold">1개를 선택</span>하시면 금융·절세·뉴스·AML 리포트가 <span className="text-emerald-400 font-bold">100% 자동 생성</span>됩니다.
         </p>
       </div>
 
-      {/* Image Preview Toggle (if image exists) */}
-      {scannedImage && (
-        <div className="glass-panel p-3 rounded-2xl border border-slate-800 space-y-2">
-          <button
-            type="button"
-            onClick={() => setShowImagePreview(!showImagePreview)}
-            className="w-full flex items-center justify-between text-xs font-bold text-slate-300 hover:text-white"
-          >
-            <span className="flex items-center gap-1.5">
-              <ImageIcon className="w-4 h-4 text-blue-400" />
-              <span>촬영/스캔한 사업자등록증 사진 원본 보기</span>
+      {/* Form Container */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* 28 Representative Industry Dropdown Selector */}
+        <div className="glass-panel p-4 rounded-3xl border border-amber-500/40 bg-amber-950/20 space-y-2.5 shadow-lg">
+          <label className="text-xs font-bold text-amber-300 flex items-center justify-between">
+            <span className="flex items-center gap-1">
+              <Building2 className="w-4 h-4 text-amber-400" /> 대한민국 28대 대표 업태 분류 (선택) *
             </span>
-            <span className="text-[10px] text-blue-400 underline">
-              {showImagePreview ? '접기 ▲' : '원본 펼치기 ▼'}
-            </span>
-          </button>
+            <span className="text-[10px] text-amber-400/80 font-normal">원터치 입력 자동화</span>
+          </label>
 
-          {showImagePreview && (
-            <div className="mt-2 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 max-h-60 flex items-center justify-center">
-              <img src={scannedImage} alt="Scanned Certificate" className="object-contain max-h-60 w-full" />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Interactive Form Card */}
-      <div className="glass-panel p-5 rounded-3xl space-y-4 border border-slate-800">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-primary flex items-center justify-center text-white font-bold shadow-md">
-              <Building2 className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">국세청 사업자등록증 판독 데이터</span>
-              <h3 className="text-sm font-bold text-white leading-tight">{formData.companyName || '사업장 상호를 입력하세요'}</h3>
-            </div>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Company Name & Representative */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
-                <span>상호 / 법인명 *</span>
-                {formData.companyName && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
-              </label>
-              <input
-                type="text"
-                value={formData.companyName}
-                onChange={(e) => handleChange('companyName', e.target.value)}
-                placeholder="예: (주)신한테크"
-                className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl glass-input text-white border border-slate-700 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300 flex items-center justify-between">
-                <span>대표자 성명 *</span>
-                {formData.representative && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
-              </label>
-              <input
-                type="text"
-                value={formData.representative}
-                onChange={(e) => handleChange('representative', e.target.value)}
-                placeholder="예: 홍길동"
-                className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl glass-input text-white border border-slate-700 focus:border-blue-500"
-                required
-              />
-            </div>
+          <div className="relative">
+            <select
+              value={selectedIndustryId}
+              onChange={(e) => setSelectedIndustryId(Number(e.target.value))}
+              className="w-full text-xs font-extrabold px-3.5 py-3 rounded-2xl bg-slate-900 text-amber-300 border-2 border-amber-500/50 appearance-none focus:outline-none focus:border-amber-400 shadow-inner"
+            >
+              {REPRESENTATIVE_28_INDUSTRIES.map((ind) => (
+                <option key={ind.id} value={ind.id} className="bg-slate-900 text-white font-bold py-1">
+                  {ind.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
           </div>
 
-          {/* Business Type (업태) & Item Type (종목) - Highlighted */}
-          <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-500/30 space-y-3">
+          {/* Selected Industry Detail Summary */}
+          <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 text-xs space-y-1">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-amber-300 flex items-center gap-1">
-                <Edit3 className="w-3.5 h-3.5 text-amber-400" />
-                <span>업태 및 세부 종목 (수정 및 직접선택)</span>
-              </span>
-              <span className="text-[9px] text-amber-400/80 font-medium">실시간 분석의 핵심 데이터</span>
+              <span className="text-slate-400">자동 반영 업태:</span>
+              <span className="font-bold text-amber-300">{selectedInd.bType}</span>
             </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-amber-200">업태 (주업종) *</label>
-                <input
-                  type="text"
-                  value={formData.businessType}
-                  onChange={(e) => handleChange('businessType', e.target.value)}
-                  placeholder="예: 음식점업, 정보통신업"
-                  className="w-full text-xs font-bold text-amber-300 px-3 py-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 focus:border-amber-400"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-purple-200">세부 종목 *</label>
-                <input
-                  type="text"
-                  value={formData.itemType}
-                  onChange={(e) => handleChange('itemType', e.target.value)}
-                  placeholder="예: 소프트웨어 개발, 한식"
-                  className="w-full text-xs font-bold text-purple-300 px-3 py-2.5 rounded-xl bg-purple-950/40 border border-purple-500/40 focus:border-purple-400"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Quick Pick Industry Chips */}
-            <div className="space-y-1.5 pt-1">
-              <span className="text-[10px] text-slate-400 block font-medium">💡 원클릭 업종 간편 선택 (원하는 업종을 터치하세요):</span>
-              <div className="flex flex-wrap gap-1">
-                {QUICK_INDUSTRIES.map((ind) => (
-                  <button
-                    key={ind.label}
-                    type="button"
-                    onClick={() => handleQuickPickIndustry(ind.bType, ind.iType)}
-                    className={`text-[10px] font-bold px-2 py-1 rounded-lg border transition-all ${
-                      formData.businessType === ind.bType
-                        ? 'bg-amber-500 text-slate-950 border-amber-400 font-extrabold shadow-sm'
-                        : 'bg-slate-800/90 text-slate-300 border-slate-700 hover:bg-slate-700'
-                    }`}
-                  >
-                    {ind.label}
-                  </button>
-                ))}
-              </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400">자동 반영 세부종목:</span>
+              <span className="font-bold text-purple-300">{selectedInd.iType}</span>
             </div>
           </div>
+        </div>
 
-          {/* Business Reg Number */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
-              <FileCode className="w-3.5 h-3.5 text-blue-400" /> 사업자등록번호
-            </label>
-            <input
-              type="text"
-              value={formData.regNumber}
-              onChange={(e) => handleChange('regNumber', e.target.value)}
-              placeholder="예: 123-45-67890"
-              className="w-full text-xs font-mono font-bold text-blue-300 px-3 py-2.5 rounded-xl glass-input border border-slate-700"
-            />
-          </div>
-
-          {/* Tax Type & Registration Date */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300">과세 및 사업자 유형</label>
-              <select
-                value={formData.taxType}
-                onChange={(e) => handleChange('taxType', e.target.value)}
-                className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl glass-input text-emerald-300 bg-slate-900 border border-slate-700"
+        {/* Quick Grid of Top 6 Popular Industries for Fast Touch */}
+        <div className="space-y-1.5">
+          <span className="text-[10px] text-slate-400 font-bold block">🔥 자주 찾는 인기 업태 빠른 터치:</span>
+          <div className="grid grid-cols-2 gap-1.5">
+            {REPRESENTATIVE_28_INDUSTRIES.slice(0, 6).map((ind) => (
+              <button
+                key={ind.id}
+                type="button"
+                onClick={() => setSelectedIndustryId(ind.id)}
+                className={`p-2.5 rounded-xl border text-left text-xs transition-all ${
+                  selectedIndustryId === ind.id
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500 font-bold shadow-md'
+                    : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:bg-slate-800'
+                }`}
               >
-                <option value="부가가치세 일반과세자">부가가치세 일반과세자</option>
-                <option value="부가가치세 간이과세자">부가가치세 간이과세자</option>
-                <option value="법인사업자 (일반과세)">법인사업자 (일반과세)</option>
-                <option value="부가가치세 면세사업자">부가가치세 면세사업자</option>
-              </select>
-            </div>
+                <span className="font-bold block truncate">{ind.label.split('.')[1] || ind.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
+        {/* Basic Business Info (Auto-populated, optional edit) */}
+        <div className="glass-panel p-4 rounded-3xl border border-slate-800 space-y-3">
+          <span className="text-[11px] font-bold text-slate-400 block border-b border-slate-800 pb-2">
+            📋 사업장 기본 정보 (자동 채움)
+          </span>
+
+          <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-300">개업연월일</label>
+              <label className="text-[10px] text-slate-400">상호명</label>
               <input
                 type="text"
-                value={formData.formattedDate || formData.registrationDate}
-                onChange={(e) => handleChange('formattedDate', e.target.value)}
-                placeholder="예: 2022년 03월 15일"
-                className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl glass-input text-slate-200 border border-slate-700"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="w-full text-xs font-semibold px-3 py-2 rounded-xl glass-input text-white border border-slate-700"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] text-slate-400">대표자명</label>
+              <input
+                type="text"
+                value={representative}
+                onChange={(e) => setRepresentative(e.target.value)}
+                className="w-full text-xs font-semibold px-3 py-2 rounded-xl glass-input text-white border border-slate-700"
               />
             </div>
           </div>
+        </div>
 
-          {/* Business Address */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-rose-400" /> 사업장 소재지 주소
-            </label>
-            <input
-              type="text"
-              value={formData.address}
-              onChange={(e) => handleChange('address', e.target.value)}
-              placeholder="예: 서울특별시 강남구 테헤란로 152"
-              className="w-full text-xs font-medium px-3 py-2.5 rounded-xl glass-input text-slate-200 border border-slate-700"
-            />
-          </div>
-
-          {/* Final Step Confirm Button */}
-          <button
-            type="submit"
-            className="w-full py-4 px-4 bg-gradient-primary text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all active:scale-98 mt-2"
-          >
-            <span>스캔 정보 확인 완료 ➔ 4대 맞춤 리포트 생성</span>
-            <ArrowRight className="w-4.5 h-4.5" />
-          </button>
-        </form>
-      </div>
+        {/* CTA Button */}
+        <button
+          type="submit"
+          className="w-full py-4 px-4 bg-gradient-primary text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all active:scale-98"
+        >
+          <span>28대 업태 선택 완료 ➔ 4대 분석 보고서 즉시 생성</span>
+          <ArrowRight className="w-4.5 h-4.5" />
+        </button>
+      </form>
     </div>
   );
 }
