@@ -115,6 +115,7 @@ export default function ScannerStep({ onScanComplete }) {
             accept="image/*"
             capture="environment"
             className="hidden"
+            style={{ display: 'none' }}
             onChange={(e) => {
               if (e.target.files?.[0]) {
                 runVisualStepPipeline(e.target.files[0]);
@@ -129,6 +130,7 @@ export default function ScannerStep({ onScanComplete }) {
             ref={uploadInputRef}
             accept="image/*,.pdf"
             className="hidden"
+            style={{ display: 'none' }}
             onChange={(e) => {
               if (e.target.files?.[0]) {
                 runVisualStepPipeline(e.target.files[0]);
