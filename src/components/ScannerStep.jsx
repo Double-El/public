@@ -9,7 +9,32 @@ export default function ScannerStep({ onScanComplete }) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepLogs, setStepLogs] = useState([]);
 
-  const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const uploadInputRef = useRef(null);
+
+  // Drag and drop state
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      runVisualStepPipeline(e.dataTransfer.files[0]);
+    }
+  };
 
   // Visual Steps Pipeline Definition
   const runVisualStepPipeline = async (file) => {
@@ -69,16 +94,40 @@ export default function ScannerStep({ onScanComplete }) {
       {/* High-Tech Signs AI Document Scanner Viewfinder Card */}
       <div className="space-y-3">
         <div
-          onClick={() => !isScanning && fileInputRef.current?.click()}
-          className="relative overflow-hidden card-clean p-6 text-center cursor-pointer border-2 border-[#b3a3f8]/30 hover:border-[#b3a3f8] bg-[#0c091d]/90 scanner-grid-bg transition-all duration-300 shadow-2xl shadow-[#674ddb]/20 group rounded-3xl"
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`relative overflow-hidden card-clean p-6 text-center border-2 ${
+            isDragging ? 'border-[#b3a3f8] bg-[#1a133d]/90 scale-[1.01]' : 'border-[#b3a3f8]/30 bg-[#0c091d]/90'
+          } scanner-grid-bg transition-all duration-300 shadow-2xl shadow-[#674ddb]/20 group rounded-3xl`}
         >
+          {/* 1. Camera Capture Input (Mobile Camera direct trigger) */}
           <input
             type="file"
-            ref={fileInputRef}
+            ref={cameraInputRef}
             accept="image/*"
             capture="environment"
             className="hidden"
-            onChange={(e) => e.target.files?.[0] && runVisualStepPipeline(e.target.files[0])}
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                runVisualStepPipeline(e.target.files[0]);
+                e.target.value = '';
+              }
+            }}
+          />
+
+          {/* 2. Photo / File Upload Input (Gallery / Album file picker) */}
+          <input
+            type="file"
+            ref={uploadInputRef}
+            accept="image/*,.pdf"
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                runVisualStepPipeline(e.target.files[0]);
+                e.target.value = '';
+              }
+            }}
           />
 
           {/* 4-Corner Viewfinder Reticles HUD */}
@@ -100,9 +149,9 @@ export default function ScannerStep({ onScanComplete }) {
           <div className="animate-scan-laser pointer-events-none" />
 
           {/* Central Scanner Viewport */}
-          <div className="py-6 space-y-4 relative z-10">
+          <div className="py-5 space-y-4 relative z-10">
             {isScanning ? (
-              <div className="space-y-4">
+              <div className="space-y-4 py-4">
                 <div className="relative w-16 h-16 mx-auto">
                   <div className="absolute inset-0 rounded-full border-2 border-[#b3a3f8] border-t-transparent animate-spin" />
                   <div className="w-16 h-16 rounded-full bg-[#674ddb]/30 flex items-center justify-center backdrop-blur-sm">
@@ -112,18 +161,56 @@ export default function ScannerStep({ onScanComplete }) {
                 <p className="text-sm font-bold text-[#eeeaff] tracking-wide font-sans">사업자등록증 스캔 분석 진행 중...</p>
               </div>
             ) : (
-              <div className="space-y-4">
-                {/* Primary Trigger Buttons with exact User Text */}
-                <div className="space-y-2.5 pt-2">
-                  <div className="w-full py-3.5 px-4 rounded-2xl btn-primary text-[#eeeaff] text-xs font-black shadow-lg shadow-[#674ddb]/30 flex items-center justify-center gap-2">
-                    <Camera className="w-4 h-4 text-[#eeeaff]" />
-                    <span>사업자등록증 촬영</span>
-                  </div>
+              <div className="space-y-3.5">
+                <p className="text-xs text-[#b3a3f8]/90 font-medium">
+                  사업자등록증 촬영 또는 앨범의 사진을 업로드해 주세요
+                </p>
 
-                  <div className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#1e1740]/90 hover:bg-[#281f54] text-[#b3a3f8] border border-[#b3a3f8]/30 text-xs font-bold transition-all shadow-sm">
-                    <Upload className="w-3.5 h-3.5 text-[#b3a3f8]" />
-                    <span>사업자등록증 업로드</span>
-                  </div>
+                {/* Clearly Separated Action Buttons */}
+                <div className="space-y-3 pt-1">
+                  {/* Button 1: Camera Capture */}
+                  <button
+                    type="button"
+                    disabled={isScanning}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      cameraInputRef.current?.click();
+                    }}
+                    className="w-full py-3.5 px-4 rounded-2xl btn-primary text-[#eeeaff] shadow-lg shadow-[#674ddb]/30 flex flex-col items-center justify-center gap-1 hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer border border-[#b3a3f8]/30 group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-[#eeeaff]" />
+                      <span className="text-xs font-black tracking-wide">사업자등록증 사진 촬영</span>
+                      <span className="text-[9px] font-mono font-bold bg-[#eeeaff]/20 px-1.5 py-0.5 rounded text-[#eeeaff] ml-1">
+                        카메라
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-normal text-[#eeeaff]/80">
+                      모바일 카메라로 직접 찍어 스캔
+                    </span>
+                  </button>
+
+                  {/* Button 2: Photo / File Upload */}
+                  <button
+                    type="button"
+                    disabled={isScanning}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      uploadInputRef.current?.click();
+                    }}
+                    className="w-full py-3.5 px-4 rounded-2xl bg-[#1e1740]/90 hover:bg-[#281f54] active:scale-[0.98] text-[#b3a3f8] hover:text-[#eeeaff] border-2 border-[#b3a3f8]/40 hover:border-[#b3a3f8] flex flex-col items-center justify-center gap-1 transition-all cursor-pointer shadow-md group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Upload className="w-4 h-4 text-[#b3a3f8] group-hover:text-[#eeeaff]" />
+                      <span className="text-xs font-black tracking-wide">사업자등록증 사진/파일 업로드</span>
+                      <span className="text-[9px] font-mono font-bold bg-[#b3a3f8]/20 px-1.5 py-0.5 rounded text-[#b3a3f8] group-hover:text-[#eeeaff] ml-1">
+                        갤러리 / 앨범
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-normal text-[#b3a3f8]/80 group-hover:text-[#eeeaff]/80">
+                      앨범이나 파일 보관함에서 선택
+                    </span>
+                  </button>
                 </div>
               </div>
             )}
