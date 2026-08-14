@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     const { imageBase64, textInput, parsedClientData } = req.body || {};
 
-    // 1. Primary AI Vision: Google Gemini Latest Vision OCR Engine (Gemini 2.5 Flash / 2.5 Pro / 2.0 Flash)
+    // 1. Primary AI Vision: Google Gemini 3.6 Flash Vision OCR Engine
     if (imageBase64) {
       const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "";
       
@@ -81,7 +81,7 @@ Extract exact fields into valid JSON:
               }
 
               if (parsed && (parsed.companyName || parsed.regNumber)) {
-                console.log(`[Gemini 2.5 Vision AI Success] Model: ${modelName}, Company: ${parsed.companyName}, BType: ${parsed.businessType}`);
+                console.log(`[Gemini 3.6 Flash Vision AI Success] Model: ${modelName}, Company: ${parsed.companyName}, BType: ${parsed.businessType}`);
 
                 return res.status(200).json({
                   success: true,
@@ -98,7 +98,7 @@ Extract exact fields into valid JSON:
                     businessType: parsed.businessType || "정보통신업",
                     itemType: parsed.itemType || "소프트웨어 개발 및 공급",
                     taxType: parsed.taxType || "부가가치세 일반과세자",
-                    aiAnalysisSummary: parsed.aiAnalysisSummary || `Gemini 2.5 AI 인지 완료: ${parsed.businessType || '해당 업종'} 전문 사업장`,
+                    aiAnalysisSummary: parsed.aiAnalysisSummary || `Gemini 3.6 Flash AI 인지 완료: ${parsed.businessType || '해당 업종'} 전문 사업장`,
                     isHeadOffice: true,
                     rawOCRText: textOut,
                     isParsedAnything: true

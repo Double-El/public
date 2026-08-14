@@ -536,7 +536,7 @@ export async function scanWithClientGeminiAPI(compressedBase64, onProgress) {
 
   for (const modelName of modelNames) {
     try {
-      if (onProgress) onProgress({ status: 'scanning', progress: 0.50, message: `Direct Gemini 2.5 Flash (${modelName}) 초고속 시각 AI 분석 중...` });
+      if (onProgress) onProgress({ status: 'scanning', progress: 0.50, message: `Direct Gemini 3.6 Flash (${modelName}) 초고속 시각 AI 분석 중...` });
 
       const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
       const promptText = `Analyze this Korean Business Registration Certificate (사업자등록증/사업자등록증명) image with high precision.
@@ -585,7 +585,7 @@ Extract exact fields into valid JSON:
         }
 
         if (parsed && (parsed.companyName || parsed.regNumber)) {
-          if (onProgress) onProgress({ status: 'done', progress: 1.0, message: `Gemini 2.5 Direct Vision AI (${modelName}) 분석 완료!` });
+          if (onProgress) onProgress({ status: 'done', progress: 1.0, message: `Gemini 3.6 Flash Direct Vision AI (${modelName}) 분석 완료!` });
           return {
             regNumber: parsed.regNumber || "214-88-91234",
             corpRegNumber: parsed.corpRegNumber || "",
@@ -598,11 +598,11 @@ Extract exact fields into valid JSON:
             businessType: parsed.businessType || "정보통신업",
             itemType: parsed.itemType || "소프트웨어 개발 및 공급",
             taxType: parsed.taxType || "부가가치세 일반과세자",
-            aiAnalysisSummary: parsed.aiAnalysisSummary || `Gemini 2.5 AI 인지 완료: ${parsed.businessType || '해당 업종'} 전문 사업장`,
+            aiAnalysisSummary: parsed.aiAnalysisSummary || `Gemini 3.6 Flash AI 인지 완료: ${parsed.businessType || '해당 업종'} 전문 사업장`,
             isHeadOffice: true,
             rawOCRText: textOut,
             isParsedAnything: true,
-            scanEngine: `Gemini 2.5 Direct Vision (${modelName})`
+            scanEngine: `Gemini 3.6 Flash Direct Vision (${modelName})`
           };
         }
       }
@@ -617,9 +617,9 @@ Extract exact fields into valid JSON:
  * Perform High-Accuracy Image OCR Scan via Google Gemini Flash Vision AI with Local Fallback
  */
 export async function runOCRScan(imageSource, onProgress) {
-  // 1. Primary AI Vision: Google Gemini 2.5 Flash Latest Vision OCR Engine
+  // 1. Primary AI Vision: Google Gemini 3.6 Flash Latest Vision OCR Engine
   try {
-    if (onProgress) onProgress({ status: 'initializing', progress: 0.25, message: 'Google Gemini 2.5 Flash 최신 시각 AI 모델로 이미지 업로드 및 판독 중...' });
+    if (onProgress) onProgress({ status: 'initializing', progress: 0.25, message: 'Google Gemini 3.6 Flash 최신 시각 AI 모델로 이미지 업로드 및 판독 중...' });
 
     // Compress raw photo to ~200KB to guarantee payload transmission under Vercel serverless limit
     const compressedSource = await compressImageForGemini(imageSource);
@@ -640,10 +640,10 @@ export async function runOCRScan(imageSource, onProgress) {
     if (res.ok) {
       const data = await res.json();
       if (data.success && data.data && data.data.companyName) {
-        if (onProgress) onProgress({ status: 'done', progress: 1.0, message: 'Gemini 2.5 Flash AI 시각 판독 완벽 인지 완료!' });
+        if (onProgress) onProgress({ status: 'done', progress: 1.0, message: 'Gemini 3.6 Flash AI 시각 판독 완벽 인지 완료!' });
         return {
           ...data.data,
-          scanEngine: 'Gemini 2.5 Vision AI Server'
+          scanEngine: 'Gemini 3.6 Flash Vision AI Server'
         };
       }
     } else {
