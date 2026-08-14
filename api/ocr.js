@@ -17,10 +17,15 @@ export default async function handler(req, res) {
       const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
       if (apiKey) {
-        console.log("[Gemini Vision AI] GEMINI_API_KEY detected! Triggering Gemini 1.5 Flash Vision OCR...");
-        try {
-          const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-          const promptText = `Analyze this Korean Business Registration Certificate (사업자등록증/사업자등록증명) image with high precision.
+        console.log("[Gemini 2.0 Vision AI] GEMINI_API_KEY detected! Triggering Gemini 2.0 Flash Vision OCR...");
+        
+        // Multi-tier latest Gemini models: gemini-2.0-flash -> gemini-2.0-flash-exp -> gemini-1.5-flash
+        const modelNames = ["gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash"];
+
+        for (const modelName of modelNames) {
+          try {
+            const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const promptText = `Analyze this Korean Business Registration Certificate (사업자등록증/사업자등록증명) image with high precision using Gemini 2.0 Vision.
 Extract exact fields into raw valid JSON with keys:
 {
   "regNumber": "10-digit registration number",
@@ -36,29 +41,54 @@ Extract exact fields into raw valid JSON with keys:
 }
 Respond ONLY with valid JSON.`;
 
-          const gRes = await fetch(geminiEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{
-                parts: [
-                  { text: promptText },
-                  { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
-                ]
-              }],
-              generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
-            })
-          });
+            const gRes = await fetch(geminiEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: promptText },
+                    { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
+                  ]
+                }],
+                generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+              })
+            });
 
-          if (gRes.ok) {
-            const gData = await gRes.json();
-            const textOut = gData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-            const jsonMatch = textOut.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-              const parsed = JSON.parse(jsonMatch[0]);
-              return res.status(200).json({
-                success: true,
-                method: 'gemini_vision_ai',
+            if (gRes.ok) {
+              const gData = await gRes.json();
+              const textOut = gData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+              const jsonMatch = textOut.match(/\{[\s\S]*\}/);
+              if (jsonMatch) {
+                const parsed = JSON.parse(jsonMatch[0]);
+                return res.status(200).json({
+                  success: true,
+                  method: `gemini_2_0_vision_ai (${modelName})`,
+                  data: {
+                    regNumber: parsed.regNumber || "214-88-91234",
+                    corpRegNumber: parsed.corpRegNumber || "",
+                    companyName: parsed.companyName || "스캔된 사업장",
+                    representative: parsed.representative || "대표자명",
+                    registrationDate: parsed.registrationDate || "20220315",
+                    formattedDate: parsed.formattedDate || "2022년 03월 15일",
+                    issueDate: parsed.formattedDate || "2022년 03월 15일",
+                    address: parsed.address || "서울특별시 강남구 테헤란로 152",
+                    businessType: parsed.businessType || "정보통신업",
+                    itemType: parsed.itemType || "소프트웨어 개발 및 공급",
+                    taxType: parsed.taxType || "부가가치세 일반과세자",
+                    isHeadOffice: true,
+                    rawOCRText: textOut,
+                    isParsedAnything: true
+                  }
+                });
+              }
+            }
+          } catch (mErr) {
+            console.warn(`[Gemini Model Error] ${modelName} failed, attempting next model:`, mErr);
+          }
+        }
+      }
+    }
                 data: {
                   regNumber: parsed.regNumber || "214-88-91234",
                   corpRegNumber: parsed.corpRegNumber || "",
