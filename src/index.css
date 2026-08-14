@@ -158,16 +158,10 @@ input[type="file"] {
   50% { opacity: 0.4; transform: scale(0.85); }
 }
 
-/* Rotating Neon Border Glow Effect */
-@keyframes spinBorder {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 /* Rotating Outer Border Neon Glow Effect */
 @keyframes spinBorder {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .rotating-border-box-camera {
@@ -195,10 +189,10 @@ input[type="file"] {
 .rotating-border-glow-camera {
   position: absolute;
   z-index: 1;
-  top: -150%;
-  left: -150%;
-  width: 400%;
-  height: 400%;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  aspect-ratio: 1 / 1;
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
@@ -214,10 +208,10 @@ input[type="file"] {
 .rotating-border-glow-upload {
   position: absolute;
   z-index: 1;
-  top: -150%;
-  left: -150%;
-  width: 400%;
-  height: 400%;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  aspect-ratio: 1 / 1;
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
