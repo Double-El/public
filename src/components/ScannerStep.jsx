@@ -257,8 +257,8 @@ export default function ScannerStep({ onScanComplete }) {
 
           {/* Bottom Telemetry Target Crosshair Bar */}
           <div className="flex items-center justify-between text-[9px] font-mono text-[#b3a3f8]/50 pt-2 border-t border-[#b3a3f8]/15">
-            <span>[AUTO-FRAME MATCHING]</span>
-            <span>SIGNS AI CERT ENGINE v2.6</span>
+            <span>[AUTO-FRAME]</span>
+            <span>SIGNS AI CERT ENGINE v2.718</span>
           </div>
         </div>
 
