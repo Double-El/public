@@ -175,12 +175,12 @@ export default function ScannerStep({ onScanComplete }) {
                   사업자등록증을 촬영하거나 앨범에서 선택해 주세요
                 </p>
 
-                {/* Ultra-Fancy High-Contrast Line-by-Line Action Buttons */}
+                {/* Action Buttons with Rotating Neon Border Glow */}
                 <div className="flex flex-col space-y-4 pt-2 w-full">
                   {/* Line 1: Camera Capture Button */}
                   <label
                     htmlFor="mobile-camera-file-input"
-                    className="relative overflow-hidden w-full py-4.5 px-5 rounded-2xl btn-fancy-camera text-white flex items-center justify-between gap-3 cursor-pointer group select-none shadow-lg"
+                    className="rotating-border-box w-full cursor-pointer group select-none shadow-xl hover:scale-[1.01] transition-all duration-300"
                     onClick={(e) => {
                       if (isScanning) {
                         e.preventDefault();
@@ -191,33 +191,30 @@ export default function ScannerStep({ onScanComplete }) {
                       }
                     }}
                   >
-                    <div className="flex items-center gap-4 relative z-10">
-                      <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border-2 border-white/40 shadow-md group-hover:scale-110 transition-transform duration-300">
-                        <Camera className="w-6 h-6 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
-                      </div>
-                      <div className="text-left">
+                    {/* Rotating Glowing Neon Laser Border */}
+                    <div className="rotating-border-glow-camera" />
+
+                    {/* Inner Button Surface */}
+                    <div className="relative z-10 w-full py-4.5 px-5 rounded-[1.1rem] btn-fancy-camera text-white flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-4 relative z-10">
+                        <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border-2 border-white/40 shadow-md group-hover:scale-110 transition-transform duration-300">
+                          <Camera className="w-6 h-6 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
+                        </div>
                         <div className="text-base font-extrabold tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                           사업자등록증 사진 촬영
                         </div>
-                        <div className="text-xs text-white/90 font-medium">
-                          카메라로 즉시 촬영하여 AI 자동 스캔
-                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 relative z-10 flex-shrink-0">
-                      <span className="text-xs font-mono font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-xl text-white border border-white/40 shadow-sm flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#52ff99] animate-ping" />
-                        카메라
-                      </span>
-                      <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+                      <div className="relative z-10 flex-shrink-0 flex items-center">
+                        <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </label>
 
                   {/* Line 2: Photo / File Upload Button */}
                   <label
                     htmlFor="mobile-upload-file-input"
-                    className="relative overflow-hidden w-full py-4.5 px-5 rounded-2xl btn-fancy-upload text-white flex items-center justify-between gap-3 cursor-pointer group select-none shadow-lg"
+                    className="rotating-border-box w-full cursor-pointer group select-none shadow-xl hover:scale-[1.01] transition-all duration-300"
                     onClick={(e) => {
                       if (isScanning) {
                         e.preventDefault();
@@ -228,26 +225,23 @@ export default function ScannerStep({ onScanComplete }) {
                       }
                     }}
                   >
-                    <div className="flex items-center gap-4 relative z-10">
-                      <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border-2 border-white/40 shadow-md group-hover:scale-110 transition-transform duration-300">
-                        <Upload className="w-6 h-6 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
-                      </div>
-                      <div className="text-left">
+                    {/* Rotating Glowing Neon Laser Border */}
+                    <div className="rotating-border-glow-upload" />
+
+                    {/* Inner Button Surface */}
+                    <div className="relative z-10 w-full py-4.5 px-5 rounded-[1.1rem] btn-fancy-upload text-white flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-4 relative z-10">
+                        <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center flex-shrink-0 border-2 border-white/40 shadow-md group-hover:scale-110 transition-transform duration-300">
+                          <Upload className="w-6 h-6 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" />
+                        </div>
                         <div className="text-base font-extrabold tracking-wide text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                           사진 / 파일 업로드
                         </div>
-                        <div className="text-xs text-white/90 font-medium">
-                          앨범 사진 또는 PDF/이미지 파일 선택
-                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 relative z-10 flex-shrink-0">
-                      <span className="text-xs font-mono font-bold bg-white/25 backdrop-blur-md px-3 py-1 rounded-xl text-white border border-white/40 shadow-sm flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-[#38bdf8] animate-ping" />
-                        앨범/파일
-                      </span>
-                      <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+                      <div className="relative z-10 flex-shrink-0 flex items-center">
+                        <ChevronRight className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </label>
                 </div>
