@@ -191,13 +191,13 @@ input[type="file"] {
   z-index: 1;
   top: 50%;
   left: 50%;
-  width: 250%;
+  width: 450%;
   aspect-ratio: 1 / 1;
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
-    transparent 290deg,
-    #ffe869 320deg,
+    transparent 280deg,
+    #ffe869 315deg,
     #c084fc 345deg,
     #ffffff 360deg
   );
@@ -210,13 +210,13 @@ input[type="file"] {
   z-index: 1;
   top: 50%;
   left: 50%;
-  width: 250%;
+  width: 450%;
   aspect-ratio: 1 / 1;
   background: conic-gradient(
     from 0deg,
     transparent 0deg,
-    transparent 290deg,
-    #38bdf8 320deg,
+    transparent 280deg,
+    #38bdf8 315deg,
     #818cf8 345deg,
     #ffffff 360deg
   );
