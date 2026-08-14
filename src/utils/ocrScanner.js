@@ -466,26 +466,74 @@ export function parseBusinessCertificateText(text) {
 }
 
 /**
+ * Fast Client Image Compressor for Gemini Vision API:
+ * Resizes raw camera photos (~12MB) to optimal Gemini resolution (~200KB),
+ * preventing Vercel 413 Payload Too Large errors and API timeouts.
+ */
+export function compressImageForGemini(imageSource, maxDim = 1600, quality = 0.85) {
+  return new Promise((resolve) => {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        let width = img.naturalWidth || img.width || 1200;
+        let height = img.naturalHeight || img.height || 1600;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = () => resolve(imageSource);
+      img.src = imageSource;
+    } catch (e) {
+      resolve(imageSource);
+    }
+  });
+}
+
+/**
  * Perform High-Accuracy Image OCR Scan via Google Gemini Flash Vision AI with Local Fallback
  */
 export async function runOCRScan(imageSource, onProgress) {
-  // 1. Primary AI Vision: Google Gemini 1.5 Flash Vision OCR Engine
+  // 1. Primary AI Vision: Google Gemini 2.0 Flash Vision OCR Engine
   try {
-    if (onProgress) onProgress({ status: 'initializing', progress: 0.25, message: 'Google Gemini Flash Vision 시각 모델로 이미지 업로드 및 판독 중...' });
+    if (onProgress) onProgress({ status: 'initializing', progress: 0.25, message: 'Google Gemini 2.0 Flash 시각 모델로 이미지 업로드 및 판독 중...' });
 
-    // Send image to Vercel Serverless /api/ocr endpoint
+    // Compress raw photo to ~200KB to guarantee payload transmission under Vercel serverless limit
+    const compressedSource = await compressImageForGemini(imageSource);
+
+    // Send compressed image to Vercel Serverless /api/ocr endpoint
     const res = await fetch('/api/ocr', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: imageSource })
+      body: JSON.stringify({ imageBase64: compressedSource })
     });
 
     if (res.ok) {
       const data = await res.json();
       if (data.success && data.data && data.data.companyName) {
-        if (onProgress) onProgress({ status: 'done', progress: 1.0, message: 'Gemini AI 시각 판독 완벽 인지 완료!' });
+        if (onProgress) onProgress({ status: 'done', progress: 1.0, message: 'Gemini 2.0 AI 시각 판독 완벽 인지 완료!' });
         return data.data;
       }
+    } else {
+      console.warn(`[/api/ocr Route Warning] Server status: ${res.status}`);
     }
   } catch (gErr) {
     console.warn("[Gemini Vision AI API] Serverless OCR route bypass, attempting client engine:", gErr);

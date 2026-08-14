@@ -11,22 +11,32 @@ export default async function handler(req, res) {
   try {
     const { imageBase64, textInput, parsedClientData } = req.body || {};
 
-    // 1. Primary: If imageBase64 provided, call Google Gemini 1.5 Flash Vision AI OCR
+    // 1. Primary AI Vision: Google Gemini 2.0 Flash Vision OCR Engine
     if (imageBase64) {
       const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "";
-      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+      
+      // Detect MIME type and clean base64 string
+      let mimeType = 'image/jpeg';
+      let base64Data = imageBase64;
+
+      if (imageBase64.startsWith('data:')) {
+        const parts = imageBase64.split(',');
+        const match = parts[0].match(/data:(.*?);base64/);
+        if (match) mimeType = match[1];
+        base64Data = parts[1];
+      }
 
       if (apiKey) {
-        console.log("[Gemini 2.0 Vision AI] GEMINI_API_KEY detected! Triggering Gemini 2.0 Flash Vision OCR...");
-        
-        // Multi-tier latest Gemini models: gemini-2.0-flash -> gemini-2.0-flash-exp -> gemini-1.5-flash
+        console.log(`[Gemini 2.0 Vision AI] GEMINI_API_KEY detected! MimeType: ${mimeType}, Size: ${Math.round(base64Data.length / 1024)}KB`);
+
+        // Multi-model strategy: gemini-2.0-flash -> gemini-2.0-flash-exp -> gemini-1.5-flash
         const modelNames = ["gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash"];
 
         for (const modelName of modelNames) {
           try {
             const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-            const promptText = `Analyze this Korean Business Registration Certificate (사업자등록증/사업자등록증명) image with high precision using Gemini 2.0 Vision.
-Extract exact fields into raw valid JSON with keys:
+            const promptText = `Analyze this Korean Business Registration Certificate (사업자등록증/사업자등록증명) image with high precision.
+Extract exact fields into raw valid JSON with exact keys:
 {
   "regNumber": "10-digit registration number",
   "corpRegNumber": "13-digit corporate number if present else empty",
@@ -39,7 +49,7 @@ Extract exact fields into raw valid JSON with keys:
   "itemType": "exact item type (종목)",
   "taxType": "부가가치세 일반과세자, 간이과세자, or 법인사업자"
 }
-Respond ONLY with valid JSON.`;
+Respond ONLY with raw valid JSON without markdown fencing.`;
 
             const gRes = await fetch(geminiEndpoint, {
               method: 'POST',
@@ -48,7 +58,7 @@ Respond ONLY with valid JSON.`;
                 contents: [{
                   parts: [
                     { text: promptText },
-                    { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
+                    { inline_data: { mime_type: mimeType, data: base64Data } }
                   ]
                 }],
                 generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
@@ -61,6 +71,8 @@ Respond ONLY with valid JSON.`;
               const jsonMatch = textOut.match(/\{[\s\S]*\}/);
               if (jsonMatch) {
                 const parsed = JSON.parse(jsonMatch[0]);
+                console.log(`[Gemini 2.0 Vision AI Success] Parsed Company: ${parsed.companyName}, BType: ${parsed.businessType}, IType: ${parsed.itemType}`);
+
                 return res.status(200).json({
                   success: true,
                   method: `gemini_2_0_vision_ai (${modelName})`,
@@ -82,35 +94,16 @@ Respond ONLY with valid JSON.`;
                   }
                 });
               }
+            } else {
+              const errBody = await gRes.text();
+              console.warn(`[Gemini Model Response Error] ${modelName} returned status ${gRes.status}:`, errBody);
             }
           } catch (mErr) {
-            console.warn(`[Gemini Model Error] ${modelName} failed, attempting next model:`, mErr);
+            console.warn(`[Gemini Model Exception] ${modelName} failed:`, mErr);
           }
         }
-      }
-    }
-                data: {
-                  regNumber: parsed.regNumber || "214-88-91234",
-                  corpRegNumber: parsed.corpRegNumber || "",
-                  companyName: parsed.companyName || "스캔된 사업장",
-                  representative: parsed.representative || "대표자명",
-                  registrationDate: parsed.registrationDate || "20220315",
-                  formattedDate: parsed.formattedDate || "2022년 03월 15일",
-                  issueDate: parsed.formattedDate || "2022년 03월 15일",
-                  address: parsed.address || "서울특별시 강남구 테헤란로 152",
-                  businessType: parsed.businessType || "정보통신업",
-                  itemType: parsed.itemType || "소프트웨어 개발 및 공급",
-                  taxType: parsed.taxType || "부가가치세 일반과세자",
-                  isHeadOffice: true,
-                  rawOCRText: textOut,
-                  isParsedAnything: true
-                }
-              });
-            }
-          }
-        } catch (gErr) {
-          console.warn("[Server Gemini Vision Error]:", gErr);
-        }
+      } else {
+        console.warn("[Gemini 2.0 Vision AI Warning] GEMINI_API_KEY environment variable is empty!");
       }
     }
 
