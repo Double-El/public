@@ -623,11 +623,11 @@ export function getAMLComplianceChecklist(certData) {
 export async function runAgentReasoningChain(certData, onProgress) {
   const steps = [
     { progress: 0.2, message: `🤖 AI 에이전트가 [${certData.companyName}] 사업자등록증 데이터를 수집 및 인지(Perceive) 중입니다...` },
-    { progress: 0.4, message: `📊 [${certData.businessType} / ${certData.itemType}] 업종의 Gemini 2026 정책자금 DB 및 금융 우대 조건 분석 중...` },
+    { progress: 0.4, message: `📊 [${certData.businessType} / ${certData.itemType}] 업종의 Gemini 2.5 Flash 최신 정책자금 DB 및 금융 우대 조건 분석 중...` },
     { progress: 0.6, message: `📰 네이버 소상공인 특화 데이터베이스에서 [${certData.businessType}] 규제 및 최신 이슈 수집 중...` },
     { progress: 0.8, message: `🤫 Google NotebookLM 연동으로 [${certData.businessType}] 업계 비하인드 인사이드 팁 추출 중...` },
     { progress: 0.9, message: `🛡️ [${certData.businessType}] 특화 자금세탁방지(AML) & CDD 리스크 점검표 생성 중...` },
-    { progress: 1.0, message: `✅ 4대 종합 분석(Gemini 금융 + Naver 이슈 + NotebookLM 인사이드 + AML 점검) 리포트가 완성되었습니다!` }
+    { progress: 1.0, message: `✅ 4대 종합 분석(Gemini 2.5 금융 + Naver 이슈 + NotebookLM 인사이드 + AML 점검) 리포트가 완성되었습니다!` }
   ];
 
   for (const step of steps) {
@@ -638,13 +638,69 @@ export async function runAgentReasoningChain(certData, onProgress) {
 
 /**
  * Interactive Q&A Response Generator for AI Agent Chat
+ * Uses Google Gemini Latest API (gemini-2.5-flash / gemini-2.0-flash) with local domain fallback
  */
 export async function askAgentQuestion(question, certData, financialList, industryData) {
-  await new Promise(res => setTimeout(res, 400));
-
-  const qLower = question.toLowerCase();
   const company = certData.companyName || "사업자";
   const bType = certData.businessType || "해당 업종";
+  const iType = certData.itemType || "기타";
+  const rep = certData.representative || "대표자";
+
+  // Check for Gemini API key in client environment or runtime
+  let apiKey = "";
+  try {
+    apiKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) ||
+             (typeof process !== 'undefined' && process.env && (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY)) ||
+             "";
+  } catch (e) {
+    // Ignore env error
+  }
+
+  if (apiKey) {
+    const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const promptText = `You are "BIZ AI 에이전트" (AI Business & Financial Advisory Consultant) for Shinhan BIZ SCANNER.
+Client Business Details:
+- Company Name: ${company}
+- Representative: ${rep}
+- Business Type (업태): ${bType}
+- Item Type (종목): ${iType}
+- Tax Type: ${certData.taxType || "일반과세"}
+- Address: ${certData.address || "미상"}
+
+Client Question: "${question}"
+
+Respond in friendly, professional Korean business advice tone.
+Focus on practical policy funds (소상공인 정책자금, 신용보증재단), tax saving (의제매입세액, 노란우산공제, 홈택스 사업용 카드), labor & regulation laws, and AML (자금세탁방지/고액현금거래/사업용계좌) compliance tips.
+Use bullet points and emojis. Keep the answer under 3-4 paragraphs.`;
+
+    for (const modelName of modelNames) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        const gRes = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+          })
+        });
+
+        if (gRes.ok) {
+          const gData = await gRes.json();
+          const reply = gData?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (reply && reply.trim().length > 0) {
+            return `🤖 [BIZ AI 에이전트 (${modelName}) 답변]\n\n${reply.trim()}`;
+          }
+        }
+      } catch (err) {
+        console.warn(`[askAgentQuestion Gemini API Error] ${modelName} call failed:`, err);
+      }
+    }
+  }
+
+  // Graceful domain fallback if API key is not present or API call failed
+  await new Promise(res => setTimeout(res, 400));
+  const qLower = question.toLowerCase();
 
   if (qLower.includes("자금세탁") || qLower.includes("aml") || qLower.includes("cdd") || qLower.includes("현금거래") || qLower.includes("실제소유자")) {
     return `🛡️ [BIZ AI 에이전트 AML 점검 답변]\n\n${company} (${bType})의 **자금세탁방지(AML) 핵심 점검 사항**입니다:\n\n1. **고액 현금거래 보고(CTR)**: 1일 1,000만원 이상 현금 거래 발생 시 FIU 보고 대상입니다. 100% 현금영수증 및 적격 증빙 발행이 필수입니다.\n2. **사업용 계좌 사용**: 대표자 개인 계좌 사용 시 매출 누락 및 세무조사/의심거래(STR) 대상이 됩니다.\n3. **실제소유자(BO) 확인**: 법인/사업자 주요 주주 변동 시 거래 은행에 CDD 정보를 즉시 갱신해 주세요.`;

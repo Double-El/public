@@ -184,13 +184,13 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
         </button>
       </div>
 
-      {/* PILLAR 1: Gemini AI 업종별 맞춤 금융·절세 솔루션 */}
+      {/* PILLAR 1: Gemini 2.5 AI 업종별 맞춤 금융·절세 솔루션 */}
       {activeTab === 'gemini_financial' && (
         <div className="space-y-4">
           <div className="glass-card rounded-2xl p-4 border border-blue-500/30 bg-blue-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-blue-400 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-400" /> Gemini AI 업종별 맞춤 금융·절세 솔루션
+                <Sparkles className="w-3 h-3 text-amber-400" /> Gemini 2.5 AI 업종별 맞춤 금융·절세 솔루션
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/30 text-blue-200">
                 {geminiFinancial.isCorp ? "법인사업자 우대" : "개인사업자 우대"}

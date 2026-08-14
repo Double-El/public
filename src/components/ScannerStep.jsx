@@ -148,7 +148,7 @@ export default function ScannerStep({ onScanComplete }) {
           <div className="flex items-center justify-between text-[10px] font-mono text-[#b3a3f8]/80 px-2 pt-1 pb-3 border-b border-[#b3a3f8]/15">
             <span className="flex items-center gap-1.5 font-bold text-[#eeeaff]">
               <span className="w-2 h-2 rounded-full bg-[#b3a3f8] animate-ping inline-block" />
-              ● AI OCR ACTIVE
+              ● GEMINI 2.5 VISION AI ACTIVE
             </span>
             <span className="text-[#b3a3f8]/70">PRECISION: HIGH (1600PX)</span>
           </div>

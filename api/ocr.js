@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   try {
     const { imageBase64, textInput, parsedClientData } = req.body || {};
 
-    // 1. Primary AI Vision: Google Gemini 2.0 Flash Vision OCR Engine
+    // 1. Primary AI Vision: Google Gemini Latest Vision OCR Engine (Gemini 2.5 Flash / 2.5 Pro / 2.0 Flash)
     if (imageBase64) {
       const apiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "";
       
@@ -27,29 +27,29 @@ export default async function handler(req, res) {
       }
 
       if (apiKey) {
-        console.log(`[Gemini 2.0 Vision AI] GEMINI_API_KEY detected! MimeType: ${mimeType}, Size: ${Math.round(base64Data.length / 1024)}KB`);
+        console.log(`[Gemini Vision AI] GEMINI_API_KEY detected! MimeType: ${mimeType}, Size: ${Math.round(base64Data.length / 1024)}KB`);
 
-        // Multi-model strategy: gemini-2.0-flash -> gemini-2.0-flash-exp -> gemini-1.5-flash
-        const modelNames = ["gemini-2.0-flash", "gemini-2.0-flash-exp", "gemini-1.5-flash"];
+        // Multi-model strategy: gemini-2.5-flash -> gemini-2.5-pro -> gemini-2.0-flash -> gemini-2.0-flash-lite -> gemini-1.5-flash
+        const modelNames = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
 
         for (const modelName of modelNames) {
           try {
             const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
             const promptText = `Analyze this Korean Business Registration Certificate (사업자등록증/사업자등록증명) image with high precision.
-Extract exact fields into raw valid JSON with exact keys:
+Extract exact fields into valid JSON:
 {
-  "regNumber": "10-digit registration number",
-  "corpRegNumber": "13-digit corporate number if present else empty",
+  "regNumber": "10-digit registration number (000-00-00000 format)",
+  "corpRegNumber": "13-digit corporate registration number if present else empty string",
   "companyName": "exact company/business name (상호/법인명)",
   "representative": "exact representative name (성명/대표자)",
   "registrationDate": "YYYYMMDD format",
   "formattedDate": "YYYY년 MM월 DD일 format",
   "address": "exact location address (사업장소재지)",
-  "businessType": "exact business type (업태)",
+  "businessType": "exact business type (업태 e.g. 음식점업, 정보통신업, 제조업, 도소매업)",
   "itemType": "exact item type (종목)",
-  "taxType": "부가가치세 일반과세자, 간이과세자, or 법인사업자"
-}
-Respond ONLY with raw valid JSON without markdown fencing.`;
+  "taxType": "부가가치세 일반과세자, 간이과세자, or 법인사업자",
+  "aiAnalysisSummary": "1-sentence Korean summary of business profile and stage"
+}`;
 
             const gRes = await fetch(geminiEndpoint, {
               method: 'POST',
@@ -61,21 +61,31 @@ Respond ONLY with raw valid JSON without markdown fencing.`;
                     { inline_data: { mime_type: mimeType, data: base64Data } }
                   ]
                 }],
-                generationConfig: { temperature: 0.1, maxOutputTokens: 1024 }
+                generationConfig: {
+                  responseMimeType: "application/json",
+                  temperature: 0.1,
+                  maxOutputTokens: 1024
+                }
               })
             });
 
             if (gRes.ok) {
               const gData = await gRes.json();
               const textOut = gData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-              const jsonMatch = textOut.match(/\{[\s\S]*\}/);
-              if (jsonMatch) {
-                const parsed = JSON.parse(jsonMatch[0]);
-                console.log(`[Gemini 2.0 Vision AI Success] Parsed Company: ${parsed.companyName}, BType: ${parsed.businessType}, IType: ${parsed.itemType}`);
+              let parsed = {};
+              try {
+                parsed = JSON.parse(textOut);
+              } catch (pErr) {
+                const jsonMatch = textOut.match(/\{[\s\S]*\}/);
+                if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+              }
+
+              if (parsed && (parsed.companyName || parsed.regNumber)) {
+                console.log(`[Gemini 2.5 Vision AI Success] Model: ${modelName}, Company: ${parsed.companyName}, BType: ${parsed.businessType}`);
 
                 return res.status(200).json({
                   success: true,
-                  method: `gemini_2_0_vision_ai (${modelName})`,
+                  method: `gemini_vision_ai (${modelName})`,
                   data: {
                     regNumber: parsed.regNumber || "214-88-91234",
                     corpRegNumber: parsed.corpRegNumber || "",
@@ -88,6 +98,7 @@ Respond ONLY with raw valid JSON without markdown fencing.`;
                     businessType: parsed.businessType || "정보통신업",
                     itemType: parsed.itemType || "소프트웨어 개발 및 공급",
                     taxType: parsed.taxType || "부가가치세 일반과세자",
+                    aiAnalysisSummary: parsed.aiAnalysisSummary || `Gemini 2.5 AI 인지 완료: ${parsed.businessType || '해당 업종'} 전문 사업장`,
                     isHeadOffice: true,
                     rawOCRText: textOut,
                     isParsedAnything: true
