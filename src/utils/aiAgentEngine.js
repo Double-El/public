@@ -657,7 +657,7 @@ export async function askAgentQuestion(question, certData, financialList, indust
   }
 
   if (apiKey) {
-    const modelNames = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+    const modelNames = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-latest", "gemini-pro-latest"];
     const promptText = `You are "BIZ AI 에이전트" (AI Business & Financial Advisory Consultant) for Shinhan BIZ SCANNER.
 Client Business Details:
 - Company Name: ${company}

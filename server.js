@@ -2,6 +2,27 @@ import express from 'express';
 import cors from 'cors';
 import nodemailer from 'nodemailer';
 import { createWorker } from 'tesseract.js';
+import fs from 'fs';
+import path from 'path';
+
+// Auto load .env into process.env for local execution
+try {
+  const envPath = path.resolve(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf8');
+    for (const line of envConfig.split('\n')) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const [key, ...vals] = trimmed.split('=');
+        if (key) {
+          const k = key.trim();
+          const v = vals.join('=').trim();
+          if (v) process.env[k] = v;
+        }
+      }
+    }
+  }
+} catch (e) {}
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -48,7 +69,7 @@ app.post('/api/ocr', async (req, res) => {
       }
 
       console.log(`[OCR Server] Attempting Gemini Latest Vision AI OCR...`);
-      const modelNames = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash"];
+      const modelNames = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-latest", "gemini-pro-latest"];
 
       for (const modelName of modelNames) {
         try {

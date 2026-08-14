@@ -532,7 +532,7 @@ export async function scanWithClientGeminiAPI(compressedBase64, onProgress) {
     base64Data = parts[1];
   }
 
-  const modelNames = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
+  const modelNames = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-latest", "gemini-pro-latest"];
 
   for (const modelName of modelNames) {
     try {
