@@ -1,4 +1,4 @@
-import { getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets } from './aiAgentEngine';
+import { getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist } from './aiAgentEngine';
 
 const DEFAULT_TARGET_EMAIL = 'e.factorials@gmail.com, myungmin@shinhan.com';
 
@@ -9,6 +9,7 @@ export function generateEmailReportBody(certData, financialList, industryData) {
   const geminiFin = getGeminiFinancialAnalysis(certData);
   const naverIss = getNaverIndustryIssues(certData);
   const notebookSec = getNotebookInsiderSecrets(certData);
+  const amlCheck = getAMLComplianceChecklist(certData);
 
   const geminiStr = geminiFin.recommendations.map((rec, idx) => {
     return `${idx + 1}. [${rec.tag}] ${rec.title} (${rec.amount})
@@ -27,8 +28,14 @@ export function generateEmailReportBody(certData, financialList, industryData) {
    - 노하우: ${tip.secret}`;
   }).join('\n\n');
 
+  const amlStr = amlCheck.checkpoints.map((check, idx) => {
+    return `${idx + 1}. [${check.status}] ${check.title}
+   - 점검 내용: ${check.desc}
+   - 조치 가이드: ${check.guideline}`;
+  }).join('\n\n');
+
   return `=================================================
-[Shinhan BIZ SCANNER] 사업자 맞춤형 3대 종합 분석 리포트
+[Shinhan BIZ SCANNER] 사업자 맞춤형 4대 종합 분석 리포트
 발행일자: ${now}
 수신자: ${DEFAULT_TARGET_EMAIL}
 =================================================
@@ -48,13 +55,20 @@ export function generateEmailReportBody(certData, financialList, industryData) {
 -------------------------------------------------
 ${geminiStr}
 
-3. 📰 [Naver] 업태 및 종목 최신 이슈 & 규제 뉴스
+3. 📰 [Naver] 업태 및 종목 최신 이슈 & 소상공인 규제 뉴스
 -------------------------------------------------
 ${naverStr}
 
 4. 🤫 [Google NotebookLM] 업계 사람들만 아는 비하인드 팁
 -------------------------------------------------
 ${notebookStr}
+
+5. 🛡️ [AML] 업종별 맞춤 자금세탁방지 점검사항 (위험도: ${amlCheck.riskLevel})
+-------------------------------------------------
+• 분야: ${amlCheck.sector} (${amlCheck.riskLabel})
+• 고객확인 의무(CDD/EDD): ${amlCheck.cddType}
+
+${amlStr}
 
 -------------------------------------------------
 본 리포트는 Shinhan BIZ SCANNER 모바일 서비스를 통해 자동 생성 및 발송된 리포트입니다.
@@ -66,7 +80,7 @@ ${notebookStr}
 export async function sendEmailReport({ recipientEmail, certData, financialList, industryData }) {
   const targetEmail = recipientEmail || DEFAULT_TARGET_EMAIL;
   const reportBody = generateEmailReportBody(certData, financialList, industryData);
-  const subject = `[Shinhan BIZ SCANNER] ${certData?.companyName || '사업자'} 맞춤형 금융·경영이슈 분석 리포트`;
+  const subject = `[Shinhan BIZ SCANNER] ${certData?.companyName || '사업자'} 맞춤형 금융·경영이슈·AML 분석 리포트`;
   const mailtoUrl = getMailtoUrl(targetEmail, certData, financialList, industryData);
 
   // 1. Try Vercel Serverless Function & Local Backend API (/api/send-email)
@@ -109,7 +123,6 @@ export async function sendEmailReport({ recipientEmail, certData, financialList,
 
   // 2. Mobile Mail App Auto Trigger (Guaranteed 100% Delivery to e.factorials@gmail.com)
   try {
-    // Automatically launch phone's native Gmail / Mail App with report pre-filled
     window.location.href = mailtoUrl;
     return {
       success: true,
@@ -132,7 +145,7 @@ export async function sendEmailReport({ recipientEmail, certData, financialList,
 // Generate Mailto URL for native email app launch
 export function getMailtoUrl(recipientEmail, certData, financialList, industryData) {
   const targetEmail = recipientEmail || DEFAULT_TARGET_EMAIL;
-  const subject = encodeURIComponent(`[BIZ SCANNER] ${certData?.companyName || '사업자'} 맞춤형 금융·경영이슈 분석 리포트`);
+  const subject = encodeURIComponent(`[BIZ SCANNER] ${certData?.companyName || '사업자'} 맞춤형 금융·경영이슈·AML 분석 리포트`);
   const body = encodeURIComponent(generateEmailReportBody(certData, financialList, industryData));
   return `mailto:${targetEmail}?subject=${subject}&body=${body}`;
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Landmark, TrendingUp, ShieldCheck, ExternalLink, ArrowRight, Sparkles, CheckCircle2, Bot, Send, Search, Lock, RefreshCw } from 'lucide-react';
+import { Landmark, TrendingUp, ShieldCheck, ShieldAlert, ExternalLink, ArrowRight, Sparkles, CheckCircle2, Bot, Send, Search, Lock, RefreshCw } from 'lucide-react';
 import { getRecommendedFinancialServices } from '../data/financialRules';
 import { getIndustryIssueData } from '../data/industryIssues';
-import { AGENT_PERSONA, runAgentReasoningChain, askAgentQuestion, getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets } from '../utils/aiAgentEngine';
+import { AGENT_PERSONA, runAgentReasoningChain, askAgentQuestion, getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist } from '../utils/aiAgentEngine';
 
 export default function AnalysisStep({ certData, onProceedToEmail }) {
-  const [activeTab, setActiveTab] = useState('gemini_financial'); // 'gemini_financial' | 'naver_issues' | 'notebook_insider' | 'chat'
+  const [activeTab, setActiveTab] = useState('gemini_financial'); // 'gemini_financial' | 'naver_issues' | 'notebook_insider' | 'aml_checklist' | 'chat'
   const [selectedFilter, setSelectedFilter] = useState('ALL');
   
   // AI Reasoning State
@@ -22,6 +22,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
   const geminiFinancial = getGeminiFinancialAnalysis(certData);
   const naverIssues = getNaverIndustryIssues(certData);
   const notebookSecrets = getNotebookInsiderSecrets(certData);
+  const amlChecklist = getAMLComplianceChecklist(certData);
 
   // Run AI reasoning chain on load
   useEffect(() => {
@@ -34,7 +35,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
         {
           id: 1,
           sender: 'agent',
-          text: `안녕하세요 ${certData.representative} 대표님! 🤖 ${AGENT_PERSONA.name}입니다.\n\n[${certData.companyName}] (${certData.businessType})의 3대 맞춤 분석(Gemini 금융 + Naver 이슈 + NotebookLM 인사이드 팁)이 준비되었습니다.\n\n궁금한 세무, 노무, 대출 자격 등을 질문해 주시면 실시간으로 컨설팅해 드립니다!`,
+          text: `안녕하세요 ${certData.representative} 대표님! 🤖 ${AGENT_PERSONA.name}입니다.\n\n[${certData.companyName}] (${certData.businessType})의 4대 맞춤 분석(Gemini 금융 + Naver 이슈 + NotebookLM 인사이드 + AML 점검)이 준비되었습니다.\n\n궁금한 세무, 절세, 자금세탁방지(AML), 대출 자격 등을 질문해 주시면 실시간으로 컨설팅해 드립니다!`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -74,11 +75,6 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
     }
   };
 
-  const filteredFinancials = financialList.filter(item => {
-    if (selectedFilter === 'ALL') return true;
-    return item.category.includes(selectedFilter);
-  });
-
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-6 pb-28">
       {/* AI Agent Reasoning Status Banner */}
@@ -90,7 +86,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
             </div>
             <div>
               <span className="text-[10px] font-bold uppercase text-indigo-400 tracking-wider flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5 text-amber-400" /> AI 3대 지능형 종합 분석
+                <Sparkles className="w-2.5 h-2.5 text-amber-400" /> AI 4대 지능형 종합 분석
               </span>
               <h2 className="text-sm font-bold text-white leading-tight">
                 {certData.companyName} <span className="text-xs font-normal text-slate-400">({certData.representative} 대표)</span>
@@ -119,14 +115,14 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
               업태: <span className="text-amber-300">{certData.businessType}</span> · 종목: <span className="text-purple-300">{certData.itemType}</span>
             </p>
             <p className="text-[11px] text-slate-400">
-              Gemini 금융 분석 + 네이버 실시간 뉴스 + NotebookLM 인사이드 노하우가 결합되었습니다.
+              Gemini 금융 분석 + 네이버 소상공인 뉴스 + NotebookLM 노하우 + AML 자금세탁방지 점검이 완성되었습니다.
             </p>
           </div>
         )}
       </div>
 
-      {/* Main 4 Navigation Tabs */}
-      <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-slate-900 border border-slate-800 text-[10px] font-bold">
+      {/* Main 5 Navigation Tabs */}
+      <div className="grid grid-cols-5 gap-1 p-1 rounded-2xl bg-slate-900 border border-slate-800 text-[10px] font-bold">
         <button
           onClick={() => setActiveTab('gemini_financial')}
           className={`py-2 px-1 rounded-xl transition-all flex flex-col items-center justify-center gap-1 ${
@@ -164,6 +160,18 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
         </button>
 
         <button
+          onClick={() => setActiveTab('aml_checklist')}
+          className={`py-2 px-1 rounded-xl transition-all flex flex-col items-center justify-center gap-1 ${
+            activeTab === 'aml_checklist'
+              ? 'bg-rose-600 text-white shadow-md'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <ShieldAlert className="w-3.5 h-3.5 text-rose-300" />
+          <span>AML 점검</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('chat')}
           className={`py-2 px-1 rounded-xl transition-all flex flex-col items-center justify-center gap-1 ${
             activeTab === 'chat'
@@ -176,13 +184,13 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
         </button>
       </div>
 
-      {/* PILLAR 1: Gemini AI 금융 요소 분석 */}
+      {/* PILLAR 1: Gemini AI 업종별 맞춤 금융·절세 솔루션 */}
       {activeTab === 'gemini_financial' && (
         <div className="space-y-4">
           <div className="glass-card rounded-2xl p-4 border border-blue-500/30 bg-blue-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-blue-400 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-400" /> Gemini AI 금융 맞춤 솔루션
+                <Sparkles className="w-3 h-3 text-amber-400" /> Gemini AI 업종별 맞춤 금융·절세 솔루션
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/30 text-blue-200">
                 {geminiFinancial.isCorp ? "법인사업자 우대" : "개인사업자 우대"}
@@ -228,13 +236,13 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
         </div>
       )}
 
-      {/* PILLAR 2: 네이버 업태와 종목의 주요 이슈 */}
+      {/* PILLAR 2: 네이버 소상공인 특화 업태 및 종목 최신 & 규제 뉴스 */}
       {activeTab === 'naver_issues' && (
         <div className="space-y-4">
           <div className="glass-card rounded-2xl p-4 border border-emerald-500/30 bg-emerald-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1">
-                <Search className="w-3 h-3 text-emerald-300" /> Naver 실시간 업종 뉴스 & 이슈
+                <Search className="w-3 h-3 text-emerald-300" /> Naver 소상공인 특화 업종 규제 & 이슈
               </span>
               <a
                 href={naverIssues.naverMainSearchUrl}
@@ -246,7 +254,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
               </a>
             </div>
             <p className="text-xs text-slate-200 font-medium">
-              [{certData.businessType} / {certData.itemType}] 관련 2026년 네이버 최신 이슈 및 규제 뉴스입니다.
+              [{certData.businessType} / {certData.itemType}] 소상공인을 위한 2026년 규제, 노무 법률 및 지원금 뉴스입니다.
             </p>
           </div>
 
@@ -279,35 +287,24 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
                 </div>
               </div>
             ))}
-
-            {/* Static Industry Issues */}
-            {industryData.keyIssues.slice(0, 2).map((issue, idx) => (
-              <div key={`static-${idx}`} className="glass-card rounded-2xl p-4 space-y-2 border border-slate-800">
-                <h5 className="text-xs font-bold text-white">{issue.title}</h5>
-                <p className="text-xs text-slate-300">{issue.description}</p>
-                <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
-                  <span className="font-bold text-indigo-300">권장 조치: </span>{issue.actionPlan}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       )}
 
-      {/* PILLAR 3: Google NotebookLM 업태의 사람들만 아는 비하인드 팁 */}
+      {/* PILLAR 3: Google NotebookLM 업종 특화 인사이트 팁 */}
       {activeTab === 'notebook_insider' && (
         <div className="space-y-4">
           <div className="glass-card rounded-2xl p-4 border border-purple-500/30 bg-purple-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-purple-400 flex items-center gap-1">
-                <Lock className="w-3 h-3 text-purple-300" /> Google NotebookLM 비하인드 노하우
+                <Lock className="w-3 h-3 text-purple-300" /> Google NotebookLM 업종 특화 인사이트
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/30 text-purple-200">
                 연동 상태: 인증 완료 ✅
               </span>
             </div>
             <p className="text-xs text-slate-200 font-medium">
-              [{notebookSecrets.sector || certData.businessType}] 분야 현장 실무자들과 업계 베테랑들의 NotebookLM 수집 분석 인사이트 팁입니다.
+              [{notebookSecrets.sector || certData.businessType}] 업계 사람들에게 가장 중요한 무형의 실무 노하우 데이터베이스입니다.
             </p>
           </div>
 
@@ -326,7 +323,55 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
         </div>
       )}
 
-      {/* TAB 4: 🤖 AI 에이전트 실시간 대화 & Q&A */}
+      {/* PILLAR 4: 🛡️ AML 자금세탁방지 업종별 맞춤 점검사항 */}
+      {activeTab === 'aml_checklist' && (
+        <div className="space-y-4">
+          <div className="glass-card rounded-2xl p-4 border border-rose-500/30 bg-rose-950/20 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase text-rose-400 flex items-center gap-1">
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-400" /> AML 자금세탁방지 업종별 점검 솔루션
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/30 text-rose-200">
+                위험도: {amlChecklist.riskLevel}
+              </span>
+            </div>
+            <p className="text-xs text-slate-200 font-medium">
+              [{amlChecklist.sector}] 대표님이 필수적으로 준수해야 할 자금세탁방지(AML) 및 금융 점검 항목입니다.
+            </p>
+            <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] text-amber-300 font-medium">
+              💡 고객확인 의무 (CDD/EDD): <span className="text-slate-200">{amlChecklist.cddType}</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {amlChecklist.checkpoints.map((check) => (
+              <div key={check.id} className="glass-card rounded-2xl p-4 space-y-3 border border-slate-800">
+                <div className="flex items-start justify-between">
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${
+                    check.status === 'CRITICAL'
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                      : check.status === 'HIGH'
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                      : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                  }`}>
+                    {check.status === 'CRITICAL' ? '필수 점검 (CRITICAL)' : check.status === 'HIGH' ? '중요 권고 (HIGH)' : '주의 (WARNING)'}
+                  </span>
+                </div>
+                <h4 className="text-sm font-bold text-white leading-snug">{check.title}</h4>
+                <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-2.5 rounded-xl border border-slate-800">
+                  {check.desc}
+                </p>
+                <div className="flex items-center gap-1.5 text-[11px] text-emerald-300 font-medium pt-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                  <span>조치 가이드: {check.guideline}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: 🤖 AI 에이전트 실시간 대화 & Q&A */}
       {activeTab === 'chat' && (
         <div className="space-y-4">
           <div className="glass-panel rounded-2xl p-3 border border-indigo-500/30 bg-indigo-950/20 flex items-center justify-between">
@@ -334,7 +379,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
               <Bot className="w-5 h-5 text-indigo-400" />
               <div>
                 <h4 className="text-xs font-bold text-white">{AGENT_PERSONA.name} 실시간 상담</h4>
-                <p className="text-[10px] text-slate-400">대출, 세제, 노무 등 궁금하신 내용을 질문하세요</p>
+                <p className="text-[10px] text-slate-400">대출, 절세, AML 점검, 노무 등 질문해 주세요</p>
               </div>
             </div>
           </div>
@@ -369,7 +414,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
 
           {/* Quick Question Chips */}
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            {['정책대출 신청 조건', '의제매입세액 절세법', '노란우산공제 세액공제'].map((q) => (
+            {['자금세탁방지 점검법', '의제매입세액 절세법', '정책대출 신청 조건', '노란우산공제 세액공제'].map((q) => (
               <button
                 key={q}
                 onClick={() => setUserQuery(q)}
@@ -407,7 +452,7 @@ export default function AnalysisStep({ certData, onProceedToEmail }) {
             onClick={() => onProceedToEmail(financialList, industryData)}
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-primary text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all active:scale-98"
           >
-            <span>3대 종합 분석 리포트 메일로 발송받기</span>
+            <span>4대 종합 분석 리포트 메일로 발송받기</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
