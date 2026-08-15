@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Landmark, TrendingUp, ShieldCheck, ShieldAlert, ExternalLink, ArrowRight, Sparkles, CheckCircle2, Bot, Send, Search, Lock, RefreshCw } from 'lucide-react';
+import { Landmark, TrendingUp, ShieldCheck, ShieldAlert, ExternalLink, ArrowRight, Sparkles, CheckCircle2, Bot, Send, Search, Lock, RefreshCw, Youtube, Play } from 'lucide-react';
 import { getRecommendedFinancialServices } from '../data/financialRules';
 import { getIndustryIssueData } from '../data/industryIssues';
-import { AGENT_PERSONA, runAgentReasoningChain, askAgentQuestion, getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist } from '../utils/aiAgentEngine';
+import { AGENT_PERSONA, runAgentReasoningChain, askAgentQuestion, getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist, getYouTubeIndustryVideos } from '../utils/aiAgentEngine';
 
 export default function AnalysisStep({ certData, scannedImage, autoSentMessage, onProceedToEmail }) {
   const [activeTab, setActiveTab] = useState('gemini_financial'); // 'gemini_financial' | 'naver_issues' | 'notebook_insider' | 'aml_checklist' | 'chat'
@@ -23,6 +23,7 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
   const naverIssues = getNaverIndustryIssues(certData);
   const notebookSecrets = getNotebookInsiderSecrets(certData);
   const amlChecklist = getAMLComplianceChecklist(certData);
+  const youtubeVideos = getYouTubeIndustryVideos(certData);
 
   // Run AI reasoning chain on load
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
         {
           id: 1,
           sender: 'agent',
-          text: `안녕하세요 ${certData.representative} 대표님! 🤖 ${AGENT_PERSONA.name}입니다.\n\n[${certData.companyName}] (${certData.businessType})의 4대 맞춤 분석(Gemini 금융 + Naver 이슈 + NotebookLM 인사이드 + AML 점검)이 준비되었습니다.\n\n궁금한 세무, 절세, 자금세탁방지(AML), 대출 자격 등을 질문해 주시면 실시간으로 컨설팅해 드립니다!`,
+          text: `안녕하세요 ${certData.representative} 대표님! 🤖 ${AGENT_PERSONA.name}입니다.\n\n[${certData.companyName}] (${certData.businessType})의 4대 맞춤 분석(Gemini 금융 + Naver 이슈 + NotebookLM 인사이드 + AML 점검 + 유튜브 Q&A)이 준비되었습니다.\n\n궁금한 세무, 절세, 자금세탁방지(AML), 대출 자격 등을 질문해 주시면 실시간으로 컨설팅해 드립니다!`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
@@ -224,7 +225,7 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
           <div className="glass-card rounded-2xl p-4 border border-blue-500/30 bg-blue-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-blue-400 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-400" /> Gemini 2.5 AI 업종별 맞춤 금융·절세 솔루션
+                <Sparkles className="w-3 h-3 text-amber-400" /> [{certData.businessType}] Gemini AI 특화 금융·절세 리포트
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/30 text-blue-200">
                 {geminiFinancial.isCorp ? "법인사업자 우대" : "개인사업자 우대"}
@@ -276,7 +277,7 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
           <div className="glass-card rounded-2xl p-4 border border-emerald-500/30 bg-emerald-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1">
-                <Search className="w-3 h-3 text-emerald-300" /> Naver 소상공인 특화 업종 규제 & 이슈
+                <Search className="w-3 h-3 text-emerald-300" /> Naver [{certData.businessType}] 직접 관련 이슈 & 뉴스
               </span>
               <a
                 href={naverIssues.naverMainSearchUrl}
@@ -288,7 +289,7 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
               </a>
             </div>
             <p className="text-xs text-slate-200 font-medium">
-              [{certData.businessType} / {certData.itemType}] 소상공인을 위한 2026년 규제, 노무 법률 및 지원금 뉴스입니다.
+              [{certData.businessType} / {certData.itemType}] 사장님을 위한 2026년 최신 기사 요약 및 직접 기사 링크입니다.
             </p>
           </div>
 
@@ -296,26 +297,28 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
             {naverIssues.issueList.map((issue, idx) => (
               <div key={idx} className="glass-card rounded-2xl p-4 space-y-2.5 border border-slate-800">
                 <div className="flex items-center justify-between">
-                  <h5 className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded-full bg-slate-800 text-emerald-400 flex items-center justify-center text-[10px] font-mono">
+                  <h5 className="text-xs font-bold text-white flex items-center gap-1.5 leading-tight">
+                    <span className="w-5 h-5 rounded-full bg-slate-800 text-emerald-400 flex items-center justify-center text-[10px] font-mono flex-shrink-0">
                       0{idx + 1}
                     </span>
-                    {issue.title}
+                    <span>{issue.title}</span>
                   </h5>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex-shrink-0">
                     {issue.level}
                   </span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">{issue.summary}</p>
+                <p className="text-xs text-slate-300 leading-relaxed bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/80">
+                  {issue.summary}
+                </p>
                 <div className="flex items-center justify-between pt-1 border-t border-slate-800/80">
                   <span className="text-[10px] text-slate-400">{issue.source}</span>
                   <a
                     href={issue.naverSearchUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                    className="text-[11px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/30"
                   >
-                    <span>네이버 기사 검색</span>
+                    <span>관련 기사 링크</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
@@ -331,14 +334,14 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
           <div className="glass-card rounded-2xl p-4 border border-purple-500/30 bg-purple-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-purple-400 flex items-center gap-1">
-                <Lock className="w-3 h-3 text-purple-300" /> Google NotebookLM 업종 특화 인사이트
+                <Lock className="w-3 h-3 text-purple-300" /> Google NotebookLM [{certData.businessType}] 특화 인사이트
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/30 text-purple-200">
-                연동 상태: 인증 완료 ✅
+                인증 상태: 연결 완료 ✅
               </span>
             </div>
             <p className="text-xs text-slate-200 font-medium">
-              [{notebookSecrets.sector || certData.businessType}] 업계 사람들에게 가장 중요한 무형의 실무 노하우 데이터베이스입니다.
+              [{notebookSecrets.sector || certData.businessType}] 업계 사장님들만 공유하는 비하인드 세무·실무 노하우입니다.
             </p>
           </div>
 
@@ -363,7 +366,7 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
           <div className="glass-card rounded-2xl p-4 border border-rose-500/30 bg-rose-950/20 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold uppercase text-rose-400 flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5 text-rose-400" /> AML 자금세탁방지 업종별 점검 솔루션
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-400" /> [{certData.businessType}] AML 자금세탁방지 점검
               </span>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/30 text-rose-200">
                 위험도: {amlChecklist.riskLevel}
@@ -405,15 +408,57 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
         </div>
       )}
 
-      {/* TAB 5: 🤖 AI 에이전트 실시간 대화 & Q&A */}
+      {/* TAB 5: 🤖 AI 에이전트 실시간 대화 & 유튜브 영상 요약 추천 */}
       {activeTab === 'chat' && (
         <div className="space-y-4">
+          {/* Industry YouTube Recommended Videos Header Card */}
+          <div className="glass-card rounded-2xl p-4 border border-red-500/30 bg-red-950/20 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-red-400 flex items-center gap-1.5">
+                <Youtube className="w-4 h-4 text-red-500" /> [{certData.businessType}] 대표 관심 추천 유튜브 영상 TOP 3
+              </span>
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-red-500/30 text-red-200">
+                실시간 큐레이션
+              </span>
+            </div>
+
+            <div className="space-y-2.5">
+              {youtubeVideos.videos.map((vid) => (
+                <div key={vid.id} className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <h5 className="text-xs font-bold text-white leading-snug flex items-center gap-1">
+                      <Play className="w-3 h-3 text-red-400 flex-shrink-0 fill-red-400" />
+                      <span>{vid.title}</span>
+                    </h5>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span className="font-semibold text-red-300">{vid.channel}</span>
+                    <span>{vid.views}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed bg-slate-950/60 p-2 rounded-lg border border-slate-800/80">
+                    {vid.summary}
+                  </p>
+                  <a
+                    href={vid.youtubeUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-red-400 hover:text-red-300 pt-1"
+                  >
+                    <span>유튜브 영상 보러가기</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* AI Consultation Card */}
           <div className="glass-panel rounded-2xl p-3 border border-indigo-500/30 bg-indigo-950/20 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Bot className="w-5 h-5 text-indigo-400" />
               <div>
-                <h4 className="text-xs font-bold text-white">{AGENT_PERSONA.name} 실시간 상담</h4>
-                <p className="text-[10px] text-slate-400">대출, 절세, AML 점검, 노무 등 질문해 주세요</p>
+                <h4 className="text-xs font-bold text-white">{AGENT_PERSONA.name} 실시간 Q&A 상담</h4>
+                <p className="text-[10px] text-slate-400">대출, 절세, AML 점검, 노무, 유튜브 영상 등 질문해 주세요</p>
               </div>
             </div>
           </div>
@@ -448,7 +493,7 @@ export default function AnalysisStep({ certData, scannedImage, autoSentMessage, 
 
           {/* Quick Question Chips */}
           <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-            {['자금세탁방지 점검법', '의제매입세액 절세법', '정책대출 신청 조건', '노란우산공제 세액공제'].map((q) => (
+            {['자금세탁방지 점검법', '의제매입세액 절세법', '정책대출 신청 조건', '추천 유튜브 영상'].map((q) => (
               <button
                 key={q}
                 onClick={() => setUserQuery(q)}

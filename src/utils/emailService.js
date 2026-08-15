@@ -1,4 +1,4 @@
-import { getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist } from './aiAgentEngine';
+import { getGeminiFinancialAnalysis, getNaverIndustryIssues, getNotebookInsiderSecrets, getAMLComplianceChecklist, getYouTubeIndustryVideos } from './aiAgentEngine';
 
 const DEFAULT_TARGET_EMAIL = 'e.factorials@gmail.com, myungmin@shinhan.com';
 
@@ -10,6 +10,7 @@ export function generateEmailReportBody(certData, financialList, industryData) {
   const naverIss = getNaverIndustryIssues(certData);
   const notebookSec = getNotebookInsiderSecrets(certData);
   const amlCheck = getAMLComplianceChecklist(certData);
+  const youtubeVid = getYouTubeIndustryVideos(certData);
 
   const geminiStr = geminiFin.recommendations.map((rec, idx) => {
     return `${idx + 1}. [${rec.tag}] ${rec.title} (${rec.amount})
@@ -20,7 +21,7 @@ export function generateEmailReportBody(certData, financialList, industryData) {
   const naverStr = naverIss.issueList.map((iss, idx) => {
     return `${idx + 1}. [${iss.level}] ${iss.title}
    - 요약: ${iss.summary}
-   - 네이버 검색: ${iss.naverSearchUrl}`;
+   - 기사/검색 링크: ${iss.naverSearchUrl}`;
   }).join('\n\n');
 
   const notebookStr = notebookSec.tips.map((tip, idx) => {
@@ -34,8 +35,14 @@ export function generateEmailReportBody(certData, financialList, industryData) {
    - 조치 가이드: ${check.guideline}`;
   }).join('\n\n');
 
+  const youtubeStr = youtubeVid.videos.map((vid, idx) => {
+    return `${idx + 1}. ${vid.title} (${vid.channel} · ${vid.views})
+   - 핵심 요약: ${vid.summary}
+   - 유튜브 링크: ${vid.youtubeUrl}`;
+  }).join('\n\n');
+
   return `=================================================
-[Shinhan BIZ SCANNER] 사업자 맞춤형 4대 종합 분석 리포트
+[Shinhan BIZ SCANNER] 사업자 맞춤형 4대 종합 분석 & AI 리포트
 발행일자: ${now}
 수신자: ${DEFAULT_TARGET_EMAIL}
 =================================================
@@ -51,24 +58,28 @@ export function generateEmailReportBody(certData, financialList, industryData) {
 • 과세 및 사업유형: ${certData?.taxType || '일반과세'}
 • 사업장 소재지 : ${certData?.address || '미지정'}
 
-2. 💰 [Gemini AI] 대표자 맞춤 금융·절세·보증 솔루션
+2. 💰 [Gemini AI] 대표자 맞춤 금융·절세·보증 솔루션 (${certData?.businessType || '업태'} 특화)
 -------------------------------------------------
 ${geminiStr}
 
-3. 📰 [Naver] 업태 및 종목 최신 이슈 & 소상공인 규제 뉴스
+3. 📰 [Naver] 업태 직접 관련 최신 규제 이슈 & 기사 요약
 -------------------------------------------------
 ${naverStr}
 
-4. 🤫 [Google NotebookLM] 업계 사람들만 아는 비하인드 팁
+4. 🤫 [Google NotebookLM] 업계 실무 비하인드 인사이드 팁
 -------------------------------------------------
 ${notebookStr}
 
-5. 🛡️ [AML] 업종별 맞춤 자금세탁방지 점검사항 (위험도: ${amlCheck.riskLevel})
+5. 🛡️ [AML] 업종별 자금세탁방지 점검사항 (위험도: ${amlCheck.riskLevel})
 -------------------------------------------------
 • 분야: ${amlCheck.sector} (${amlCheck.riskLabel})
 • 고객확인 의무(CDD/EDD): ${amlCheck.cddType}
 
 ${amlStr}
+
+6. 📺 [AI Q&A] ${certData?.businessType || '업태'} 사장님 대표 관심 추천 유튜브 영상 Top 3
+-------------------------------------------------
+${youtubeStr}
 
 -------------------------------------------------
 본 리포트는 Shinhan BIZ SCANNER 모바일 서비스를 통해 자동 생성 및 발송된 리포트입니다.
